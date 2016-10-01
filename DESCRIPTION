@@ -1,0 +1,11 @@
+Package: trackr
+Type: Package
+Title: Functions for Munging GPS Tracking Data
+Version: 0.1.0
+Authors@R: person("Evan", "Morrison", email = "emorrison@gmail.com", role = c("aut", "cre"))
+Description: More about what it does (maybe more than one line)
+License: What license is it under?
+LazyData: TRUE
+Imports: dplyr,
+    jsonlite,
+    stringr
