@@ -147,10 +147,29 @@ route_dist2 <- function(route) {  # recursive
   total + haversine(lat1, lon1, lat2, lon2)
 }
 
-pct_done <- function(track, route) {
+time_remain <- function(track_mut, meters_to_fin) {
+  # returns numeric (seconds)
+  recentSpeed <- mean(tail(track_mut$kph, 5)) # last 5 trackpoints
+  conv_m_km(meters_to_fin) / recentSpeed * 3600
+}
+
+finish_time <- function(track_mut, route) {  # returns POSIXct
+  last_time <- tail(track_mut$time, 1)
+  last_time + time_remain(track_mut, dist_to_finish(track_mut, route))
+}
+
+pct_done_dist <- function(track, route) {
+  # only works if path to finish is straight line
   route_tot <- route_dist(route)
   to_finish <- dist_to_finish(track, route)
   round(100 * (route_tot - to_finish) / route_tot, 0)
+}
+
+pct_done_time <- function(track_mut, route) {  # returns numeric
+  elapsed <- track_elapsed_sec(track_mut)
+  ETR <- time_remain(track_mut, dist_to_finish(track, route))
+  total <- elapsed + ETR
+  elapsed / total * 100
 }
 
 bearing <- function (lat1, lon1, lat2, lon2) {
