@@ -7,20 +7,19 @@ conv_sec_HMS <- function(seconds) {
   c(hrs, min, sec)
 }
 
-p_conv_sec_HMS <- function(seconds) {
+p_sec_HM <- function(seconds) {
     HM <- conv_sec_HMS(seconds)[1:2]
     paste0(HM[1], "H ", HM[2], "M")
 }
 
-track_elap_sec <- function(track) {
+track_elap_sec <- function(track)
   as.integer(tail(track$time, 1)) - as.integer(head(track$time, 1))
-}
 
 p_track_elap_HM <- function(track) {
   paste0(
     conv_sec_HMS(
       track_elap_sec(track))[1], ":",
-    sprintf("%02.f", 
+    sprintf("%02.f",
       conv_sec_HMS(track_elap_sec(track))[2]))
 }
 
@@ -33,32 +32,44 @@ track_since_last <- function(track, units) {
 sinceLast <- function(track) {
   lastTime <- strftime(tail(track$time, 1), format = "%a %d %b %H:%M")
   ago <- track_since_last(track, "mins")
-  if (ago < 120) 
+  if (ago < 120)
     paste0(lastTime, " (", round(ago), " min ago)")
-  else 
+  else
     lastTime
 }
 
 # Extract coordinates from route or track
 
-coord_first <- function(latlon)  as.numeric(head(latlon, 1)[c('lat', 'lon')])
-coord_last <- function(latlon)   as.numeric(tail(latlon, 1)[c('lat', 'lon')])
-coord_max <- function(latlon)    c(max(latlon$lat), max(latlon$lon))
-coord_min <- function(latlon)    c(min(latlon$lat), min(latlon$lon))
-coord_avg <- function(latlon) {
+coord_first <- function(latlon)
+  as.numeric(head(latlon, 1)[c('lat', 'lon')])
+
+coord_last <- function(latlon)
+  as.numeric(tail(latlon, 1)[c('lat', 'lon')])
+
+coord_max <- function(latlon)
+  c(max(latlon$lat), max(latlon$lon))
+
+coord_min <- function(latlon)
+  c(min(latlon$lat), min(latlon$lon))
+
+coord_avg <- function(latlon)
   rowMeans(cbind(coord_max(latlon), coord_min(latlon)))
-}
 
 # DISTANCE ----------------------------------------
 
-conv_km_mi <- function(km)     km * 0.621371
-conv_m_km <- function(meters)  meters / 1000
-conv_m_mi <- function(meters)  conv_m_km(meters) %>% conv_km_mi
+conv_km_mi <- function(km)
+  km * 0.621371
+
+conv_m_km <- function(meters)
+  meters / 1000
+
+conv_m_mi <- function(meters)
+  conv_m_km(meters) %>% conv_km_mi
 
 conv_dist <- function(distance, units) {
-  if (units == "U.S.") 
+  if (units == "U.S.")
     conv_m_mi(distance)
-  else 
+  else
     conv_m_km(distance)
 }
 
@@ -76,13 +87,11 @@ fmt_speed <- function(speed, units) {
     speed %>% round(1) %>% paste('kph')
 }
 
-print_dist <- function(distance, units) {
+print_dist <- function(distance, units)
   conv_dist(distance, units) %>% fmt_dist(units)
-}
 
-print_speed <- function(speed, units) {
+print_speed <- function(speed, units)
   conv_dist(speed, units) %>% fmt_speed(units)
-}
 
 haversine <- function(lat1, lon1, lat2, lon2) {
   rLat1 <- lat1 * (pi / 180)        # convert to radians
@@ -102,10 +111,10 @@ haversine <- function(lat1, lon1, lat2, lon2) {
 dist_from_start <- function(track, route = NULL) {
   # returns meters
   if (is.null(route))  {
-    haversine(coord_first(track)[1], coord_first(track)[2], 
+    haversine(coord_first(track)[1], coord_first(track)[2],
               coord_last(track)[1],  coord_last(track)[2])
   } else {
-    haversine(coord_first(route)[1], coord_first(route)[2], 
+    haversine(coord_first(route)[1], coord_first(route)[2],
               coord_last(track)[1],  coord_last(track)[2])
   }
 }
@@ -116,7 +125,7 @@ dist_gps <- function(track_mut) {
 }
 
 dist_to_finish <- function(track, route) {
-  haversine(coord_last(track)[1], coord_last(track)[2], 
+  haversine(coord_last(track)[1], coord_last(track)[2],
             coord_last(route)[1],  coord_last(route)[2])
 }
 
