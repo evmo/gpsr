@@ -125,6 +125,7 @@ dist_gps <- function(track_mut) {
 }
 
 dist_to_finish <- function(track, route) {
+  # returns meters
   haversine(coord_last(track)[1], coord_last(track)[2],
             coord_last(route)[1],  coord_last(route)[2])
 }
@@ -193,3 +194,17 @@ bearing <- function (lat1, lon1, lat2, lon2) {
   bear %% (2 * pi) * (180 / pi)  # returns degrees
 }
 
+track_mutate <- function(df) {
+  df %>%
+    rename(lat1 = lat, lon1 = lon) %>%
+    mutate(lat2 = c(NA, head(lat1, nrow(df) - 1)),
+        lon2 = c(NA, head(lon1, nrow(df) - 1)),
+        dist = haversine(lat1, lon1, lat2, lon2),
+        elapsed = as.integer(time - head(time, 1)),
+        lastTime = c(NA, head(elapsed, nrow(df) - 1)),
+        timeSeg = elapsed - lastTime,
+        kph = dist / timeSeg * 3.6,
+        bearing = bearing(lat1, lon1, lat2, lon2)) %>%
+    select(-lat2, -lon2, -lastTime) %>%
+    rename(lat = lat1, lon = lon1)
+}

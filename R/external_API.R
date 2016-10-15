@@ -49,7 +49,7 @@ read_spot <- function(id, all = FALSE, password = NULL) {
 }
 
 # Scrape from API, write a CSV file
-spot2csv <- function(id, all = F, fn = 'spotData', dir = NULL) {
+spot_to_csv <- function(id, all = F, fn = 'spotData', dir = NULL) {
   df <- read_spot(id, all)
   writepath <- paste0(dir, '/', fn, '.csv')
   write.csv(df, writepath, row.names = F)
@@ -57,8 +57,6 @@ spot2csv <- function(id, all = F, fn = 'spotData', dir = NULL) {
 
 # Grab KML feed from DeLorme shared page
 read_delorme <- function(id, date1, date2 = NULL) {
-  library(xml2); library(stringr)
-
   urlhead <- 'https://share.delorme.com/feed/share/'
   d1 <- strftime(date1, '%Y-%m-%dT%H:%MZ')
   url <- paste0(urlhead, id, "?d1=", d1)
@@ -66,12 +64,12 @@ read_delorme <- function(id, date1, date2 = NULL) {
     d2 <- strftime(date2, '%Y-%m-%dT%H:%MZ')
     url <- paste0(url, "&d2=", d2)
   }
-  raw <- read_xml(url)
+  raw <- xml2::read_xml(url)
 
   process <- function(data, name) {
     xpath <- paste0(".//d1:Data[@name = '", name, "']")
-    xml_find_all(data, xpath, xml_ns(raw)) %>%
-      xml_text %>% str_trim("both")
+    xml2::xml_find_all(data, xpath, xml_ns(raw)) %>%
+      xml2::xml_text %>% stringr::str_trim("both")
   }
 
   lat <- process(raw, "Latitude") %>% as.numeric

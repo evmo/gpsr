@@ -8,4 +8,5 @@ License: What license is it under?
 LazyData: TRUE
 Imports: dplyr,
     jsonlite,
-    stringr
+    stringr,
+    xml2
