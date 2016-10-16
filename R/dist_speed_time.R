@@ -57,20 +57,11 @@ coord_avg <- function(latlon)
 
 # DISTANCE ----------------------------------------
 
-conv_km_mi <- function(km)
-  km * 0.621371
-
-conv_m_km <- function(meters)
-  meters / 1000
-
-conv_m_mi <- function(meters)
-  conv_m_km(meters) %>% conv_km_mi
-
 conv_dist <- function(distance, units) {
   if (units == "U.S.")
-    conv_m_mi(distance)
+    conv_unit(distance, "m", "mi")
   else
-    conv_m_km(distance)
+    conv_unit(distance, "m", "km")
 }
 
 fmt_dist <- function(distance, units) {
