@@ -153,3 +153,16 @@ read_tcx <- function(tcxFile) {
     
     data.frame(lat, lon, time)
 }
+
+read_spot_csv <- function(csvFile) {
+    read.csv(csvFile, header = F, colClasses = c(
+                rep("character", 3),
+                rep("numeric", 2),
+                rep("character", 2))) %>%
+        select(-c(V2, V3, V6, V7)) %>%
+        rename(lat = V4, lon = V5, time = V1) %>%
+        mutate(time = as.POSIXct(time, tz = 'GMT',
+                                format = '%m/%d/%Y %H:%M:%S')) %>%
+        select(lat, lon, time) %>%
+        arrange(time)
+}
