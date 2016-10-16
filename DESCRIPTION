@@ -9,4 +9,5 @@ LazyData: TRUE
 Imports: dplyr,
     jsonlite,
     stringr,
-    xml2
+    xml2,
+    measurements
