@@ -6,8 +6,10 @@ Authors@R: person("Evan", "Morrison", email = "emorrison@gmail.com", role = c("a
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
 LazyData: TRUE
-Imports: dplyr,
+Imports:
+    dplyr,
     jsonlite,
     stringr,
     xml2,
     measurements
+RoxygenNote: 5.0.1

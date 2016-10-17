@@ -1,3 +1,16 @@
+
+#' Read data from the SPOT API
+#'
+#' @param id SPOT feed ID
+#' @param all Fetch most recent 50 trackpoint (default) or all available
+#' @param password SPOT feed password
+#'
+#' @return A data.frame with three columns: lat (latitude), lon (longitude),
+#'  time (timestamp)
+#' @export
+#'
+#' @references \url{http://faq.findmespot.com/index.php?action=showEntry&data=69}
+#' @examples
 read_spot <- function(id, all = FALSE, password = NULL) {
 
   # grab the relevant columns from the full SPOT feed
@@ -48,14 +61,18 @@ read_spot <- function(id, all = FALSE, password = NULL) {
   return(data %>% arrange(time))
 }
 
-# Scrape from API, write a CSV file
-spot_to_csv <- function(id, all = F, fn = 'spotData', dir = NULL) {
-  df <- read_spot(id, all)
-  writepath <- paste0(dir, '/', fn, '.csv')
-  write.csv(df, writepath, row.names = F)
-}
-
-# Grab KML feed from DeLorme shared page
+#' Read data from DeLorme inReach API
+#'
+#' @param id inReach ID
+#' @param date1 Start date
+#' @param date2 End date
+#'
+#' @return A data.frame with three columns: lat (latitude), lon (longitude),
+#'  time (timestamp)
+#' @export
+#'
+#' @references \url{https://support.delorme.com/kb/articles/26-about-inreach-kml-feeds}
+#' @examples
 read_delorme <- function(id, date1, date2 = NULL) {
   urlhead <- 'https://share.delorme.com/feed/share/'
   d1 <- strftime(date1, '%Y-%m-%dT%H:%MZ')
