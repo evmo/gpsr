@@ -57,19 +57,18 @@ p_track_elap_HM <- function(track) {
       secs_to_HMS(track_elap_sec(track))[2]))
 }
 
+#' Elapsed time since last trackpoint
+#'
+#' @param track
+#' @param units
+#'
+#' @return difftime
+#' @export
+#'
+#' @examples
 track_since_last <- function(track, units) {
   last <- tail(track$time, 1)
   difftime(Sys.time(), last, units = units)
-}
-
-
-sinceLast <- function(track) {
-  lastTime <- strftime(tail(track$time, 1), format = "%a %d %b %H:%M")
-  ago <- track_since_last(track, "mins")
-  if (ago < 120)
-    paste0(lastTime, " (", round(ago), " min ago)")
-  else
-    lastTime
 }
 
 # Extract coordinates from route or track
@@ -91,33 +90,17 @@ coord_avg <- function(latlon)
 
 # DISTANCE ----------------------------------------
 
-conv_dist <- function(distance, units) {
-  if (units == "U.S.")
-    conv_unit(distance, "m", "mi")
-  else
-    conv_unit(distance, "m", "km")
-}
-
-fmt_dist <- function(distance, units) {
-  if (units == "U.S.")
-    distance %>% round(1) %>% paste('mi')
-  else
-    distance %>% round(1) %>% paste('km')
-}
-
-fmt_speed <- function(speed, units) {
-  if (units == "U.S.")
-    speed %>% round(1) %>% paste('mph')
-  else
-    speed %>% round(1) %>% paste('kph')
-}
-
-print_dist <- function(distance, units)
-  conv_dist(distance, units) %>% fmt_dist(units)
-
-print_speed <- function(speed, units)
-  conv_dist(speed, units) %>% fmt_speed(units)
-
+#' Distance between two points (haversine formula)
+#'
+#' @param lat1
+#' @param lon1
+#' @param lat2
+#' @param lon2
+#'
+#' @return meters (int)
+#' @export
+#'
+#' @examples
 haversine <- function(lat1, lon1, lat2, lon2) {
   rLat1 <- lat1 * (pi / 180)        # convert to radians
   rLon1 <- lon1 * (pi / 180)
