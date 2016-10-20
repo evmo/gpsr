@@ -80,14 +80,12 @@ dist_to_finish <- function(track, route) {
 
 speed <- function(meters, seconds) meters / seconds
 
-trk_dist <- function(route) {   # 2 columns - lat, lon
-  route <- route %>%
-    select(lat1 = lat, lon1 = lon) %>%
-    mutate(lat2 = c(NA, head(lat1, nrow(route) - 1))) %>%
-    mutate(lon2 = c(NA, head(lon1, nrow(route) - 1))) %>%
-    mutate(dist = haversine(lat1, lon1, lat2, lon2))
-
-  sum(route$dist, na.rm=T)   # returns meters
+trk_dist <- function(track) {
+  rows <- nrow(track) - 1
+  track$lat_prev <- c(NA, head(track$lat, rows)
+  track$lon_prev <- c(NA, head(track$lon, rows)
+  track$dist <- haversine(track$lat, track$lon, track$lat_prev, track$lon_prev)
+  sum(track$dist, na.rm = TRUE)
 }
 
 trk_dist2 <- function(route) {  # recursive
@@ -100,7 +98,7 @@ trk_dist2 <- function(route) {  # recursive
   if (nrow(route) == 2)
     total + haversine(lat1, lon1, lat2, lon2)
   else
-    total <- total + route_dist2(tail(route, -1))
+    total <- total + trk_dist2(tail(route, -1))
 
   total + haversine(lat1, lon1, lat2, lon2)
 }
