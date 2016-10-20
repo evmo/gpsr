@@ -1,74 +1,16 @@
-# TIME --------------------------
-
-#' Convert seconds to hours:minutes:seconds
-#'
-#' @param seconds
-#'
-#' @return Vector of c(hours, minutes, seconds)
-#' @export
-#'
-#' @examples
-secs_to_HMS <- function(seconds) {
-  hrs <- seconds %/% 3600
-  min <- (seconds - hrs * 3600) %/% 60
-  sec <- seconds - (min * 60 + hrs * 3600)
-  c(hrs, min, sec)
-}
-
-#' Print Hours:Minutes
-#'
-#' @param seconds
-#'
-#' @return String - e.g., "10H 5M"
-#' @export
-#'
-#' @examples
-p_sec_HM <- function(seconds) {
-    HM <- secs_to_HMS(seconds)[1:2]
-    paste0(HM[1], "H ", HM[2], "M")
-}
-
-#' Elapsed time of track
-#'
-#' @param track
-#'
-#' @return seconds (int)
-#' @export
-#'
-#' @examples
-track_elap_sec <- function(track) {
-  as.integer(tail(track$time, 1)) - as.integer(head(track$time, 1))
-}
-
-#' Print elapsed time of track
-#'
-#' Displays in Hours:Minutes
-#' @param track
-#'
-#' @return String - e.g., 12:20
-#' @export
-#'
-#' @examples
-p_track_elap_HM <- function(track) {
-  paste0(
-    secs_to_HMS(
-      track_elap_sec(track))[1], ":",
-    sprintf("%02.f",
-      secs_to_HMS(track_elap_sec(track))[2]))
-}
-
-#' Elapsed time since last trackpoint
-#'
-#' @param track
-#' @param units
-#'
-#' @return difftime
-#' @export
-#'
-#' @examples
-track_since_last <- function(track, units) {
-  last <- tail(track$time, 1)
-  difftime(Sys.time(), last, units = units)
+track_mutate <- function(df) {
+  df %>%
+    rename(lat1 = lat, lon1 = lon) %>%
+    mutate(lat2 = c(NA, head(lat1, nrow(df) - 1)),
+        lon2 = c(NA, head(lon1, nrow(df) - 1)),
+        dist = haversine(lat1, lon1, lat2, lon2),
+        elapsed = as.integer(time - head(time, 1)),
+        lastTime = c(NA, head(elapsed, nrow(df) - 1)),
+        timeSeg = elapsed - lastTime,
+        kph = dist / timeSeg * 3.6,
+        bearing = bearing(lat1, lon1, lat2, lon2)) %>%
+    select(-lat2, -lon2, -lastTime) %>%
+    rename(lat = lat1, lon = lon1)
 }
 
 # Extract coordinates from route or track
@@ -87,8 +29,6 @@ coord_min <- function(latlon)
 
 coord_avg <- function(latlon)
   rowMeans(cbind(coord_max(latlon), coord_min(latlon)))
-
-# DISTANCE ----------------------------------------
 
 #' Distance between two points (haversine formula)
 #'
@@ -127,7 +67,7 @@ dist_from_start <- function(track, route = NULL) {
   }
 }
 
-dist_gps <- function(track_mut) {
+trk_mut_dist <- function(track_mut) {
   # returns meters
   sum(track_mut$dist, na.rm = T)
 }
@@ -140,7 +80,7 @@ dist_to_finish <- function(track, route) {
 
 speed <- function(meters, seconds) meters / seconds
 
-route_dist <- function(route) {   # 2 columns - lat, lon
+trk_dist <- function(route) {   # 2 columns - lat, lon
   route <- route %>%
     select(lat1 = lat, lon1 = lon) %>%
     mutate(lat2 = c(NA, head(lat1, nrow(route) - 1))) %>%
@@ -150,7 +90,7 @@ route_dist <- function(route) {   # 2 columns - lat, lon
   sum(route$dist, na.rm=T)   # returns meters
 }
 
-route_dist2 <- function(route) {  # recursive
+trk_dist2 <- function(route) {  # recursive
   total <- 0
   lat1 <- route[[1, 'lat']]
   lon1 <- route[[1, 'lon']]
@@ -160,7 +100,7 @@ route_dist2 <- function(route) {  # recursive
   if (nrow(route) == 2)
     total + haversine(lat1, lon1, lat2, lon2)
   else
-    total <- total + route_dist(tail(route, -1))
+    total <- total + route_dist2(tail(route, -1))
 
   total + haversine(lat1, lon1, lat2, lon2)
 }
@@ -178,7 +118,7 @@ finish_time <- function(track_mut, route) {  # returns POSIXct
 
 pct_done_dist <- function(track, route) {
   # only works if path to finish is straight line
-  route_tot <- route_dist(route)
+  route_tot <- trk_dist(route)
   to_finish <- dist_to_finish(track, route)
   round(100 * (route_tot - to_finish) / route_tot, 0)
 }
@@ -200,19 +140,4 @@ bearing <- function (lat1, lon1, lat2, lon2) {
   bear <- atan2(sin(dlon) * cos(b1), cos(a1) * sin(b1) - sin(a1) *
                   cos(b1) * cos(dlon))
   bear %% (2 * pi) * (180 / pi)  # returns degrees
-}
-
-track_mutate <- function(df) {
-  df %>%
-    rename(lat1 = lat, lon1 = lon) %>%
-    mutate(lat2 = c(NA, head(lat1, nrow(df) - 1)),
-        lon2 = c(NA, head(lon1, nrow(df) - 1)),
-        dist = haversine(lat1, lon1, lat2, lon2),
-        elapsed = as.integer(time - head(time, 1)),
-        lastTime = c(NA, head(elapsed, nrow(df) - 1)),
-        timeSeg = elapsed - lastTime,
-        kph = dist / timeSeg * 3.6,
-        bearing = bearing(lat1, lon1, lat2, lon2)) %>%
-    select(-lat2, -lon2, -lastTime) %>%
-    rename(lat = lat1, lon = lon1)
 }
