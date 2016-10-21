@@ -46,7 +46,8 @@ parseDateTime <- function(datetimes) {
 #'
 #' @return data.frame
 #' @export
-#' @importFrom xml2 read_html xml_find_all xml_attr xml_text "%>%"
+#' @importFrom xml2 read_html xml_find_all xml_attr xml_text
+#' @importFrom magrittr "%>%"
 #'
 #' @examples
 read_gpx <- function(gpx_file) {
@@ -74,7 +75,8 @@ read_gpx <- function(gpx_file) {
 #'
 #' @return data.frame
 #' @export
-#' @importFrom xml2 read_xml xml_find_all xml_ns xml_text "%>%"
+#' @importFrom xml2 read_xml xml_find_all xml_ns xml_text
+#' @importFrom magrittr "%>%"
 #'
 #' @examples
 read_tcx <- function(tcx_file) {

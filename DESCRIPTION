@@ -7,7 +7,6 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 LazyData: TRUE
 Imports:
-    dplyr,
     jsonlite,
     stringr,
     xml2,
