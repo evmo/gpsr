@@ -1,16 +1,24 @@
-track_mutate <- function(df) {
-  df %>%
-    rename(lat1 = lat, lon1 = lon) %>%
-    mutate(lat2 = c(NA, head(lat1, nrow(df) - 1)),
-        lon2 = c(NA, head(lon1, nrow(df) - 1)),
-        dist = haversine(lat1, lon1, lat2, lon2),
-        elapsed = as.integer(time - head(time, 1)),
-        lastTime = c(NA, head(elapsed, nrow(df) - 1)),
-        timeSeg = elapsed - lastTime,
-        kph = dist / timeSeg * 3.6,
-        bearing = bearing(lat1, lon1, lat2, lon2)) %>%
-    select(-lat2, -lon2, -lastTime) %>%
-    rename(lat = lat1, lon = lon1)
+#' Mutate a track
+#' Add derived variables: distance from previous trackpoint,
+#' elapsed time since last trackpoint, speed (kph), bearing.
+#'
+#' @param track
+#'
+#' @return data.frame
+#' @export
+#'
+#' @examples
+trk_mutate <- function(track) {
+  rows <- nrow(track) - 1
+  track$lat_prev <- c(NA, head(track$lat, rows))
+  track$lon_prev <- c(NA, head(track$lon, rows))
+  track$dist <- haversine(track$lat, track$lon, track$lat_prev, track$lon_prev)
+  track$elapsed = as.integer(track$time - head(track$time, 1))
+  track$lastTime = c(NA, head(track$elapsed, rows))
+  track$timeSeg = track$elapsed - track$lastTime
+  track$kph = track$dist / track$timeSeg * 3.6
+  track$bearing = bearing(track$lat, track$lon, track$lat_prev, track$lon_prev)
+  track[, !names(track) %in% c('lat_prev', 'lon_prev', 'lastTime')]
 }
 
 # Extract coordinates from route or track
@@ -37,7 +45,7 @@ coord_avg <- function(latlon)
 #' @param lat2
 #' @param lon2
 #'
-#' @return meters (int)
+#' @return meters
 #' @export
 #'
 #' @examples
@@ -51,13 +59,42 @@ haversine <- function(lat1, lon1, lat2, lon2) {
   a <- (sin(dlat / 2))^2 + cos(rLat1) * cos(rLat2) * (sin(dlon / 2))^2
   c <- 2 * atan2(sqrt(a), sqrt(1 - a))
   R <- 6378145
-  R * c  # returns meters
+  R * c
 }
 
-# STRAIGHT-LINE DISTANCE & SPEED
+#' Bearing
+#'
+#' @param lat1
+#' @param lon1
+#' @param lat2
+#' @param lon2
+#'
+#' @return degrees
+#' @export
+#'
+#' @examples
+bearing <- function (lat1, lon1, lat2, lon2) {
+  rad <- pi/180
+  a1 <- lat1 * rad
+  a2 <- lon1 * rad
+  b1 <- lat2 * rad
+  b2 <- lon2 * rad
+  dlon <- b2 - a2
+  bear <- atan2(sin(dlon) * cos(b1), cos(a1) * sin(b1) - sin(a1) *
+                  cos(b1) * cos(dlon))
+  bear %% (2 * pi) * (180 / pi)
+}
 
+#' Distance from start, in a straight line
+#'
+#' @param track
+#' @param route
+#'
+#' @return meters
+#' @export
+#'
+#' @examples
 dist_from_start <- function(track, route = NULL) {
-  # returns meters
   if (is.null(route))  {
     haversine(coord_first(track)[1], coord_first(track)[2],
               coord_last(track)[1],  coord_last(track)[2])
@@ -67,25 +104,42 @@ dist_from_start <- function(track, route = NULL) {
   }
 }
 
-trk_mut_dist <- function(track_mut) {
-  # returns meters
-  sum(track_mut$dist, na.rm = T)
-}
-
+#' Distance between current position and finish
+#'
+#' @param track
+#' @param route
+#'
+#' @return meters
+#' @export
+#'
+#' @examples
 dist_to_finish <- function(track, route) {
-  # returns meters
   haversine(coord_last(track)[1], coord_last(track)[2],
             coord_last(route)[1],  coord_last(route)[2])
 }
 
 speed <- function(meters, seconds) meters / seconds
 
-trk_dist <- function(track) {
-  rows <- nrow(track) - 1
-  track$lat_prev <- c(NA, head(track$lat, rows)
-  track$lon_prev <- c(NA, head(track$lon, rows)
-  track$dist <- haversine(track$lat, track$lon, track$lat_prev, track$lon_prev)
-  sum(track$dist, na.rm = TRUE)
+#' Total track distance
+#' Sum of distances between trackpoints
+#'
+#' @param track
+#' @param mut_track
+#'
+#' @return meters
+#' @export
+#'
+#' @examples
+trk_dist <- function(track = NULL, mut_track = NULL) {
+  if (!is.null(mut_track)) {
+    sum(track_mut$dist, na.rm = T)
+  } else {
+    rows <- nrow(track) - 1
+    track$lat_prev <- c(NA, head(track$lat, rows))
+    track$lon_prev <- c(NA, head(track$lon, rows))
+    track$dist <- haversine(track$lat, track$lon, track$lat_prev, track$lon_prev)
+    sum(track$dist, na.rm = TRUE)
+  }
 }
 
 trk_dist2 <- function(route) {  # recursive
@@ -103,13 +157,30 @@ trk_dist2 <- function(route) {  # recursive
   total + haversine(lat1, lon1, lat2, lon2)
 }
 
+#' Estimated time (in seconds) remaining to finish
+#'
+#' @param track_mut
+#' @param meters_to_fin
+#'
+#' @return seconds
+#' @export
+#'
+#' @examples
 time_remain <- function(track_mut, meters_to_fin) {
-  # returns numeric (seconds)
   recentSpeed <- mean(tail(track_mut$kph, 5)) # last 5 trackpoints
-  conv_m_km(meters_to_fin) / recentSpeed * 3600
+  (meters_to_fin / 1000) / (recentSpeed * 3600)
 }
 
-finish_time <- function(track_mut, route) {  # returns POSIXct
+#' Estimated finish time
+#'
+#' @param track_mut
+#' @param route
+#'
+#' @return POSIXct
+#' @export
+#'
+#' @examples
+finish_time <- function(track_mut, route) {
   last_time <- tail(track_mut$time, 1)
   last_time + time_remain(track_mut, dist_to_finish(track_mut, route))
 }
@@ -126,16 +197,4 @@ pct_done_time <- function(track_mut, route) {  # returns numeric
   ETR <- time_remain(track_mut, dist_to_finish(track, route))
   total <- elapsed + ETR
   elapsed / total * 100
-}
-
-bearing <- function (lat1, lon1, lat2, lon2) {
-  rad <- pi/180
-  a1 <- lat1 * rad
-  a2 <- lon1 * rad
-  b1 <- lat2 * rad
-  b2 <- lon2 * rad
-  dlon <- b2 - a2
-  bear <- atan2(sin(dlon) * cos(b1), cos(a1) * sin(b1) - sin(a1) *
-                  cos(b1) * cos(dlon))
-  bear %% (2 * pi) * (180 / pi)  # returns degrees
 }

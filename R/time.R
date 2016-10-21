@@ -34,7 +34,7 @@ p_sec_HM <- function(seconds) {
 #' @export
 #'
 #' @examples
-track_elap_sec <- function(track) {
+trk_elapsed_sec <- function(track) {
   as.integer(tail(track$time, 1)) - as.integer(head(track$time, 1))
 }
 
@@ -47,12 +47,12 @@ track_elap_sec <- function(track) {
 #' @export
 #'
 #' @examples
-p_track_elap_HM <- function(track) {
+p_trk_elapsed_HM <- function(track) {
   paste0(
     secs_to_HMS(
-      track_elap_sec(track))[1], ":",
+      trk_elapsed_sec(track))[1], ":",
     sprintf("%02.f",
-      secs_to_HMS(track_elap_sec(track))[2]))
+      secs_to_HMS(trk_elapsed_sec(track))[2]))
 }
 
 #' Elapsed time since last trackpoint
@@ -64,7 +64,7 @@ p_track_elap_HM <- function(track) {
 #' @export
 #'
 #' @examples
-track_since_last <- function(track, units) {
+trk_since_last <- function(track, units) {
   last <- tail(track$time, 1)
   difftime(Sys.time(), last, units = units)
 }
