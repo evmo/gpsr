@@ -130,8 +130,8 @@ speed <- function(meters, seconds) meters / seconds
 #' @export
 #'
 #' @examples
-trk_dist <- function(track = NULL, mut_track = NULL) {
-  if (!is.null(mut_track)) {
+trk_dist <- function(track = NULL, track_mut = NULL) {
+  if (!is.null(track_mut)) {
     sum(track_mut$dist, na.rm = T)
   } else {
     rows <- nrow(track) - 1

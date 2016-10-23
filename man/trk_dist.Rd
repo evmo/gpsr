@@ -5,7 +5,7 @@
 \title{Total track distance
 Sum of distances between trackpoints}
 \usage{
-trk_dist(track = NULL, mut_track = NULL)
+trk_dist(track = NULL, track_mut = NULL)
 }
 \arguments{
 \item{mut_track}{}
