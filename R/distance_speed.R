@@ -118,7 +118,18 @@ dist_to_finish <- function(track, route) {
             coord_last(route)[1],  coord_last(route)[2])
 }
 
-speed <- function(meters, seconds) meters / seconds
+#' Calculate speed
+#'
+#' @param meters
+#' @param seconds
+#'
+#' @return meters per second
+#' @export
+#'
+#' @examples
+speed <- function(meters, seconds) {
+  meters / seconds
+}
 
 #' Total track distance
 #' Sum of distances between trackpoints
