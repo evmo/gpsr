@@ -50,8 +50,8 @@ parseDateTime <- function(datetimes) {
 #' @importFrom magrittr "%>%"
 #'
 #' @examples
-read_gpx <- function(gpx_file) {
-    msgs <- read_html(gpx_file)
+read_gpx <- function(gpxFile) {
+    msgs <- read_html(gpxFile)
     lat <- xml_find_all(msgs, ".//trkpt") %>% xml_attr("lat")
     lon <- xml_find_all(msgs, ".//trkpt") %>% xml_attr("lon")
     time <- xml_find_all(msgs, ".//trkseg//time") %>% xml_text
@@ -61,11 +61,10 @@ read_gpx <- function(gpx_file) {
     if (is.null(time)) {
         return(NULL)
     } else {
-        d <- data.frame(lat = as.numeric(lat),
-                        lon = as.numeric(lon),
-                        time,
-                        stringsAsFactors = F)
-        d[order(time, decreasing = T), ]
+        data.frame(lat, lon, time, stringsAsFactors = F) %>%
+            mutate(lat = as.numeric(lat)) %>%
+            mutate(lon = as.numeric(lon)) %>%
+            arrange(time)
     }
 }
 
@@ -79,8 +78,8 @@ read_gpx <- function(gpx_file) {
 #' @importFrom magrittr "%>%"
 #'
 #' @examples
-read_tcx <- function(tcx_file) {
-    raw <- read_xml(tcx_file)
+read_tcx <- function(tcxFile) {
+    raw <- read_xml(tcxFile)
 
     lat <- raw %>% xml_find_all('.//d1:LatitudeDegrees', xml_ns(raw)) %>%
         xml_text %>% as.numeric
@@ -100,10 +99,15 @@ read_tcx <- function(tcx_file) {
 #' @export
 #'
 #' @examples
-read_spot_csv <- function(csv_file) {
-    cc <- c(rep("character", 3), rep("numeric", 2), rep("character", 2))
-    d <- read.csv(csv_file, header = F, colClasses = cc)[, c('V4', 'V5', 'V1')]
-    names(d) <- c('lat', 'lon', 'time')
-    d$time <- as.POSIXct(d$time, tz = 'GMT', format = '%m/%d/%Y %H:%M:%S')
-    d[order(time, decreasing = T), ]
+read_spot_csv <- function(csvFile) {
+    read.csv(csvFile, header = F, colClasses = c(
+                rep("character", 3),
+                rep("numeric", 2),
+                rep("character", 2))) %>%
+        select(-c(V2, V3, V6, V7)) %>%
+        rename(lat = V4, lon = V5, time = V1) %>%
+        mutate(time = as.POSIXct(time, tz = 'GMT',
+                                format = '%m/%d/%Y %H:%M:%S')) %>%
+        select(lat, lon, time) %>%
+        arrange(time)
 }
