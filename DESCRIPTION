@@ -1,4 +1,4 @@
-Package: gpsr
+Package: Rgps
 Type: Package
 Title: Functions for Munging GPS Tracking Data
 Version: 0.1.0
@@ -10,5 +10,6 @@ Imports:
     jsonlite,
     stringr,
     xml2,
-    measurements
+    measurements,
+    leaflet
 RoxygenNote: 5.0.1
