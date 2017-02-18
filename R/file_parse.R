@@ -48,6 +48,7 @@ parseDateTime <- function(datetimes) {
 #' @export
 #' @importFrom xml2 read_html xml_find_all xml_attr xml_text
 #' @importFrom magrittr "%>%"
+#' @importFrom dplyr mutate arrange
 #'
 #' @examples
 read_gpx <- function(gpxFile) {
@@ -96,6 +97,7 @@ read_tcx <- function(tcxFile) {
 #' @param csv_file
 #'
 #' @return data.frame
+#' @importFrom dplyr select rename mutate arrange
 #' @export
 #'
 #' @examples
