@@ -68,3 +68,17 @@ trk_since_last <- function(track, units) {
   last <- tail(track$time, 1)
   difftime(Sys.time(), last, units = units)
 }
+
+#' Reduce trackpoint frequency
+#'
+#' @param track
+#' @param interval
+#'
+#' @return
+#' @export
+#'
+#' @examples
+trk_reduce <- function(track, interval) {
+  track$bin <- cut(track$time, breaks = interval)
+  track[!duplicated(track$bin), c("lat","lon","time")]
+}
