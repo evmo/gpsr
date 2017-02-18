@@ -4,7 +4,7 @@
 \alias{read_spot_csv}
 \title{Read SPOT-exported track in CSV format}
 \usage{
-read_spot_csv(csv_file)
+read_spot_csv(csvFile)
 }
 \arguments{
 \item{csv_file}{}

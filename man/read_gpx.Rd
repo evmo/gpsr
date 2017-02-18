@@ -4,7 +4,7 @@
 \alias{read_gpx}
 \title{Read GPX file}
 \usage{
-read_gpx(gpx_file)
+read_gpx(gpxFile)
 }
 \arguments{
 \item{gpx_file}{}

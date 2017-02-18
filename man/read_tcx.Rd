@@ -4,7 +4,7 @@
 \alias{read_tcx}
 \title{Read TCX file}
 \usage{
-read_tcx(tcx_file)
+read_tcx(tcxFile)
 }
 \arguments{
 \item{tcx_file}{}

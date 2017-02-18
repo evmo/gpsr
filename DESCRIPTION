@@ -11,5 +11,6 @@ Imports:
     stringr,
     xml2,
     measurements,
-    leaflet
+    leaflet,
+    dplyr
 RoxygenNote: 5.0.1
