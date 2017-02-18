@@ -1,61 +1,129 @@
-# route2map.R
-# input: route definition file (csv)
-#  cols: num, lat, lon, desc
-# output: html leaflet file
+#' Create a blank map
+#'
+#' @return leaflet map
+#' @export
+#'
+#' @examples
+base_map <- function() {
+  leaflet() %>%
+    addProviderTiles("Esri.NatGeoWorldMap",
+                     group = "Standard",
+                     options = providerTileOptions(attribution = "")) %>%
+    addProviderTiles("Esri.WorldImagery",
+                     group = "Satellite",
+                     options = providerTileOptions(attribution = "")) %>%
+    addLayersControl(baseGroups = c("Standard", "Satellite"))
+}
 
-mapPath <-
-  function(map, data, labelColumn = NULL, circleColor = "#FF4900",
-           lineColor = "#FF4900", noHide = F) {
+#' Display series of coordinates on a map
+#'
+#' @param map
+#' @param data
+#' @param labelColumn
+#' @param circleColor
+#' @param lineColor
+#' @param noHide
+#'
+#' @return a leaflet map
+#' @importFrom leaflet addCircles addMarkers addPolylines
+#' @export
+#'
+#' @examples
+map_path <-
+  function(map,
+           data,
+           labels = NULL,
+           circleColor = "#FF4900",
+           circleRadius = 50,
+           circleOpacity = NULL,
+           circleFillOpacity = NULL,
+           connectPoints = TRUE,
+           lineColor = "#FF4900",
+           lineType = NULL,
+           noHide = F,
+           legendGroup = NULL) {
+
     map <- map %>%
-      addCircles(data$lon, data$lat, color = circleColor, radius = 50) %>%
-      addMarkers(
+      addCircles(
         data$lon,
         data$lat,
-        label = data[, labelColumn],
-        labelOptions = labelOptions(offset = c(15,-15), noHide = noHide),
-        options = markerOptions(opacity = 0)
-      ) %>%
-      addPolylines(
-        data$lon,
-        data$lat,
-        color = lineColor,
-        weight = 3,
-        dashArray = '5,5'
-      )
+        group = legendGroup,
+        color = circleColor,
+        radius = circleRadius,
+        opacity = circleOpacity,
+        fillOpacity = circleFillOpacity)
+
+    if (connectPoints == TRUE) {
+      map <- map %>%
+        addPolylines(
+          data$lon,
+          data$lat,
+          group = legendGroup,
+          color = lineColor,
+          weight = 3,
+          dashArray = lineType
+        )
+    }
+
+    if (!is.null(labels)) {
+      map <- map %>%
+        addMarkers(
+          data$lon,
+          data$lat,
+          label = labels,
+          group = legendGroup,
+          labelOptions = labelOptions(offset = c(15, -15), noHide = noHide),
+          options = markerOptions(opacity = 0)
+        )
+    }
+
     return(map)
   }
 
+#' Display a GPS track and/or route on a map
+#'
+#' @param track
+#' @param route
+#' @param save
+#'
+#' @return leaflet map
+#' @importFrom leaflet leaflet addProviderTiles addLayersControl
+#' providerTileOptions markerOptions labelOptions
+#' @importFrom htmlwidgets saveWidget
+#' @export
+#'
+#' @examples
 map_gps <- function(track = NULL,
                     route = NULL,
+                    track_labels = NULL,
                     save = FALSE) {
-  map <- leaflet() %>%
-    addProviderTiles("Esri.NatGeoWorldMap",
-                     group = "Standard",
-                     options = providerTileOptions(attribution = "")
-    ) %>%
-    addProviderTiles("Esri.WorldImagery",
-                     group = "Satellite",
-                     options = providerTileOptions(attribution = "")
-    ) %>%
-    addLayersControl(baseGroups = c("Standard", "Satellite"))
+  map <- base_map()
 
   if (missing(track) && missing(route))
     return(map)
 
-  if (!is.null(track))
-    map <- map %>% mapPath(data = track, labelColumn = "time")
-
-  if (!is.null(route))
+  if (!is.null(track)) {
+    map <- map %>%
+      map_path(data = track, labels = track_labels, connectPoints = FALSE)
+    if (!is.null(route)) {
+      map <- map %>%
+        map_path(data = route,
+                 lineColor = 'white',
+                 circleOpacity = 0,
+                 circleFillOpacity = 0,
+                 noHide = T)
+    }
+  } else {  # route only
     map <-
-      map %>% mapPath(
+      map %>% map_path(
         data = route,
-        labelColumn = "desc",
-        lineColor = "black",
+        lineColor = "white",
         noHide = T
       )
+  }
 
   if (save == T)
-    saveWidget(map, file = "~/Downloads/map.html", selfcontained = T)
+    saveWidget(map, file = "~/Downloads/map.html")
 
   return(map)
 }
