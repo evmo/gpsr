@@ -12,5 +12,6 @@ Imports:
     xml2,
     measurements,
     leaflet,
-    dplyr
-RoxygenNote: 5.0.1
+    dplyr,
+    geosphere
+RoxygenNote: 6.0.1
