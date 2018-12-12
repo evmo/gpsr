@@ -12,4 +12,3 @@ trk_reduce(track, interval)
 \description{
 Reduce trackpoint frequency
 }
-

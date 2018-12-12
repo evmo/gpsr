@@ -15,4 +15,3 @@ degrees
 \description{
 Bearing
 }
-

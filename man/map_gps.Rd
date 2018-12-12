@@ -15,4 +15,3 @@ leaflet map
 \description{
 Display a GPS track and/or route on a map
 }
-

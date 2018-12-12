@@ -15,4 +15,3 @@ meters
 \description{
 Distance between current position and finish
 }
-

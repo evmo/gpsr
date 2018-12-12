@@ -12,4 +12,3 @@ leaflet map
 \description{
 Create a blank map
 }
-

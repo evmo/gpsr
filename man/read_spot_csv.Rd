@@ -15,4 +15,3 @@ data.frame
 \description{
 Read SPOT-exported track in CSV format
 }
-

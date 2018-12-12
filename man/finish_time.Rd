@@ -15,4 +15,3 @@ POSIXct
 \description{
 Estimated finish time
 }
-

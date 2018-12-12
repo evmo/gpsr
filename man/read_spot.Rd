@@ -23,4 +23,3 @@ Read data from the SPOT API
 \references{
 \url{http://faq.findmespot.com/index.php?action=showEntry&data=69}
 }
-

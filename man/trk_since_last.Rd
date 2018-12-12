@@ -15,4 +15,3 @@ difftime
 \description{
 Elapsed time since last trackpoint
 }
-

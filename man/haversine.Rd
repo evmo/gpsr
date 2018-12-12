@@ -15,4 +15,3 @@ meters
 \description{
 Distance between two points (haversine formula)
 }
-

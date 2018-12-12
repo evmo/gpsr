@@ -5,8 +5,9 @@
 \title{Display series of coordinates on a map}
 \usage{
 map_path(map, data, labels = NULL, circleColor = "#FF4900",
-  circleRadius = 50, connectPoints = TRUE, lineColor = "#FF4900",
-  lineType = NULL, noHide = F, legendGroup = NULL)
+  circleRadius = 50, circleOpacity = NULL, circleFillOpacity = NULL,
+  connectPoints = TRUE, lineColor = "#FF4900", lineType = NULL,
+  noHide = F, legendGroup = NULL)
 }
 \arguments{
 \item{noHide}{}
@@ -17,4 +18,3 @@ a leaflet map
 \description{
 Display series of coordinates on a map
 }
-

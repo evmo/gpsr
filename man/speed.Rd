@@ -15,4 +15,3 @@ meters per second
 \description{
 Calculate speed
 }
-

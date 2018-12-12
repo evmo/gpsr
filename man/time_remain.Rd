@@ -15,4 +15,3 @@ seconds
 \description{
 Estimated time (in seconds) remaining to finish
 }
-

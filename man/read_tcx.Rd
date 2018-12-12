@@ -15,4 +15,3 @@ data.frame
 \description{
 Read TCX file
 }
-

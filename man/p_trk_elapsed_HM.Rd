@@ -15,4 +15,3 @@ String - e.g., 12:20
 \description{
 Displays in Hours:Minutes
 }
-

@@ -15,4 +15,3 @@ Vector of c(hours, minutes, seconds)
 \description{
 Convert seconds to hours:minutes:seconds
 }
-

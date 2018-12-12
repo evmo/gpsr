@@ -19,4 +19,3 @@ Mutate a track
 Add derived variables: distance from previous trackpoint,
 elapsed time since last trackpoint, speed (kph), bearing.
 }
-

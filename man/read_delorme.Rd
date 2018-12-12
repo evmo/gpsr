@@ -23,4 +23,3 @@ Read data from DeLorme inReach API
 \references{
 \url{https://support.delorme.com/kb/articles/26-about-inreach-kml-feeds}
 }
-

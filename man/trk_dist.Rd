@@ -17,4 +17,3 @@ meters
 Total track distance
 Sum of distances between trackpoints
 }
-
