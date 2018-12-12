@@ -49,9 +49,11 @@ read_spot <- function(id, all = FALSE, password = NULL) {
     # figure out how many pages we need to download
     for (p in 2:pages) {
       cat(paste0("Downloading page ", p, "\n"))
-      start <- 50 * (p - 1) + 1
+      start <- 50 * (p - 1)
       startUrl <- paste('?start=', start, sep='')
       nextUrl <- paste(urlbase, id, urltail, startUrl, sep='')
+      if (!is.null(password))
+        nextUrl <- paste0(nextUrl, '&feedPassword=', password)
       nextMsgs <- fromJSON(nextUrl) %>% as.data.frame %>% reduce
       # append pages X's data to page 1's data
       data <- rbind(data, nextMsgs)
@@ -86,7 +88,7 @@ read_delorme <- function(id, date1, date2 = NULL) {
   process <- function(data, name) {
     xpath <- paste0(".//d1:Data[@name = '", name, "']")
     xml2::xml_find_all(data, xpath, xml_ns(raw)) %>%
-      xml2::xml_text %>% stringr::str_trim("both")
+      xml2::xml_text() %>% stringr::str_trim("both")
   }
 
   lat <- process(raw, "Latitude") %>% as.numeric
@@ -96,4 +98,22 @@ read_delorme <- function(id, date1, date2 = NULL) {
   d <- data.frame(lat, lon, time)
   if (nrow(d) == 0) stop("no data")
   else d
+}
+
+read_traccar <- function(deviceid, start_time, stop_time,
+                         db, host, port, user, password) {
+  suppressPackageStartupMessages(library(dplyr))
+  suppressPackageStartupMessages(library(RMySQL))
+
+  db <- src_mysql(db, host, port, user, password)
+
+  res <- as.data.frame(tbl(db, sql(
+    "select uniqueid, devicetime, latitude, longitude
+    from positions join devices on (positions.deviceid = devices.id)
+    where accuracy = 0")) %>%
+      filter(uniqueid == id, devicetime > start, devicetime < stop) %>%
+      select(lat = latitude, lon = longitude, time = devicetime))
+
+  if (nrow(res) == 0) stop("No rows available")
+  else return(res)
 }

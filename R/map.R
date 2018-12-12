@@ -12,7 +12,10 @@ base_map <- function() {
     addProviderTiles("Esri.WorldImagery",
                      group = "Satellite",
                      options = providerTileOptions(attribution = "")) %>%
-    addLayersControl(baseGroups = c("Standard", "Satellite"))
+    addProviderTiles("Stamen.Watercolor",
+                     group = "Watercolor",
+                     options = providerTileOptions(attribution = "")) %>%
+    addLayersControl(baseGroups = c("Standard", "Satellite", "Watercolor"))
 }
 
 #' Display series of coordinates on a map
@@ -109,6 +112,7 @@ map_gps <- function(track = NULL,
       map <- map %>%
         map_path(data = route,
                  lineColor = 'white',
+                 circleColor = 'black',
                  circleOpacity = 0,
                  circleFillOpacity = 0,
                  noHide = T)
@@ -129,3 +133,10 @@ map_gps <- function(track = NULL,
 }
 
 # label = format(track$time + 3600 * hours_from_GMT, "%H:%M")
+
+map_traccar <- function(deviceid, start_time, stop_time,
+                        db, host, port, user, password) {
+  d <- read_traccar(deviceid, start_time, stop_time,
+                    db, host, port, user, password)
+  map_gps(d)
+}
