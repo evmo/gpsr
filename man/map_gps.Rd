@@ -4,7 +4,8 @@
 \alias{map_gps}
 \title{Display a GPS track and/or route on a map}
 \usage{
-map_gps(track = NULL, route = NULL, track_labels = NULL, save = FALSE)
+map_gps(track = NULL, route = NULL, track_labels = NULL,
+  save = FALSE)
 }
 \arguments{
 \item{save}{}
