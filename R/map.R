@@ -1,87 +1,99 @@
 #' Create a blank map
 #'
-#' @return leaflet map
+#' @param providers character vector of tile providers
+#' @param labels character vector of provider labels
+#'
+#' @return map
+#' @import leaflet
+#' @importFrom purrr walk2
+#' @importFrom magrittr '%<>%'
 #' @export
 #'
 #' @examples
-base_map <- function() {
-  leaflet() %>%
-    addProviderTiles("Esri.NatGeoWorldMap",
-                     group = "Standard",
-                     options = providerTileOptions(attribution = "")) %>%
-    addProviderTiles("Esri.WorldImagery",
-                     group = "Satellite",
-                     options = providerTileOptions(attribution = "")) %>%
-    addProviderTiles("Stamen.Watercolor",
-                     group = "Watercolor",
-                     options = providerTileOptions(attribution = "")) %>%
-    addLayersControl(baseGroups = c("Standard", "Satellite", "Watercolor"))
+base_map <- function(providers = NULL, labels = NULL) {
+  map <- leaflet()
+
+  if (is.null(providers))
+    map %<>% addTiles
+  else if (length(providers) == 1) {
+    map %<>%
+      addProviderTiles(
+        providers,
+        options = providerTileOptions(attribution = "")
+      )
+  } else {
+    walk2(providers, labels, function(p, l) {
+      map <<- map %>%
+        addProviderTiles(p, group = l, options =
+                           providerTileOptions(attribution = ""))
+    })
+    map %<>% addLayersControl(baseGroups = labels)
+  }
+
+  return(map)
 }
 
-#' Display series of coordinates on a map
+#' Map Path Points
 #'
 #' @param map
 #' @param data
-#' @param labelColumn
+#' @param legendGroup
 #' @param circleColor
-#' @param lineColor
-#' @param noHide
+#' @param circleRadius
+#' @param ...
 #'
-#' @return a leaflet map
-#' @importFrom leaflet addCircles addMarkers addPolylines
+#' @return map
+#' @import leaflet
 #' @export
 #'
 #' @examples
-map_path <-
-  function(map,
-           data,
-           labels = NULL,
-           circleColor = "#FF4900",
-           circleRadius = 50,
-           circleOpacity = NULL,
-           circleFillOpacity = NULL,
-           connectPoints = TRUE,
-           lineColor = "#FF4900",
-           lineType = NULL,
-           noHide = F,
-           legendGroup = NULL) {
+map_path_points <- function(map, data, legendGroup = NULL, circleColor = "#FF4900",
+                            circleRadius = 50, ...) {
+  map %>% addCircles(
+    data$lon,
+    data$lat,
+    group = legendGroup,
+    color = circleColor,
+    radius = circleRadius,
+    ...
+  )
+}
 
-    map <- map %>%
-      addCircles(
-        data$lon,
-        data$lat,
-        group = legendGroup,
-        color = circleColor,
-        radius = circleRadius,
-        opacity = circleOpacity,
-        fillOpacity = circleFillOpacity)
+#' Map Path Lines
+#'
+#' @param map
+#' @param data
+#' @param legendGroup
+#' @param lineColor
+#' @param ...
+#'
+#' @return map
+#' @import leaflet
+#' @export
+#'
+#' @examples
+map_path_lines <- function(map, data, legendGroup = NULL,
+                           lineColor = "#FF4900", ...) {
+  map %>% addPolylines(
+    data$lon,
+    data$lat,
+    group = legendGroup,
+    color = lineColor,
+    weight = 3,
+    ...
+  )
+}
 
-    if (connectPoints == TRUE) {
-      map <- map %>%
-        addPolylines(
-          data$lon,
-          data$lat,
-          group = legendGroup,
-          color = lineColor,
-          weight = 3,
-          dashArray = lineType
-        )
-    }
-
-    if (!is.null(labels)) {
-      map <- map %>%
-        addMarkers(
-          data$lon,
-          data$lat,
-          label = labels,
-          group = legendGroup,
-          labelOptions = labelOptions(offset = c(15, -15), noHide = noHide),
-          options = markerOptions(opacity = 0)
-        )
-    }
-
-    return(map)
-  }
+add_map_labels <- function(map, data, labels, legendGroup = NULL, ...) {
+  map %>% addMarkers(
+    data$lon,
+    data$lat,
+    label = labels,
+    group = legendGroup,
+    labelOptions = labelOptions(offset = c(15, -15), ...),
+    options = markerOptions(opacity = 0)
+  )
+}
 
 #' Display a GPS track and/or route on a map
 #'
