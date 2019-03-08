@@ -4,10 +4,15 @@
 \alias{base_map}
 \title{Create a blank map}
 \usage{
-base_map()
+base_map(providers = NULL, labels = NULL)
+}
+\arguments{
+\item{providers}{character vector of tile providers}
+
+\item{labels}{character vector of provider labels}
 }
 \value{
-leaflet map
+map
 }
 \description{
 Create a blank map

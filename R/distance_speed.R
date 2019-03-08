@@ -1,43 +1,3 @@
-#' Mutate a track
-#' Add derived variables: distance from previous trackpoint,
-#' elapsed time since last trackpoint, speed (kph), bearing.
-#'
-#' @param track
-#'
-#' @return data.frame
-#' @export
-#'
-#' @examples
-trk_mutate <- function(track) {
-  rows <- nrow(track) - 1
-  track$lat_prev <- c(NA, head(track$lat, rows))
-  track$lon_prev <- c(NA, head(track$lon, rows))
-  track$dist <- haversine(track$lat, track$lon, track$lat_prev, track$lon_prev)
-  track$elapsed = as.integer(track$time - head(track$time, 1))
-  track$lastTime = c(NA, head(track$elapsed, rows))
-  track$timeSeg = track$elapsed - track$lastTime
-  track$kph = track$dist / track$timeSeg * 3.6
-  track$bearing = bearing(track$lat, track$lon, track$lat_prev, track$lon_prev)
-  track[, !names(track) %in% c('lat_prev', 'lon_prev', 'lastTime')]
-}
-
-# Extract coordinates from route or track
-
-coord_first <- function(latlon)
-  as.numeric(head(latlon, 1)[c('lat', 'lon')])
-
-coord_last <- function(latlon)
-  as.numeric(tail(latlon, 1)[c('lat', 'lon')])
-
-coord_max <- function(latlon)
-  c(max(latlon$lat), max(latlon$lon))
-
-coord_min <- function(latlon)
-  c(min(latlon$lat), min(latlon$lon))
-
-coord_avg <- function(latlon)
-  rowMeans(cbind(coord_max(latlon), coord_min(latlon)))
-
 #' Distance between two points (haversine formula)
 #'
 #' @param lat1
@@ -85,23 +45,82 @@ bearing <- function (lat1, lon1, lat2, lon2) {
   bear %% (2 * pi) * (180 / pi)
 }
 
-#' Distance from start, in a straight line
+#' Mutate a track (dplyr implementation)
+#' Add derived variables: distance from previous trackpoint,
+#' elapsed time since last trackpoint, speed (kph), bearing.
 #'
-#' @param track
-#' @param route
+#' @param track a data.frame with 3 cols: 'lat', 'lon', 'time'
 #'
-#' @return meters
+#' @return a data.frame with 4 additional cols
+#' @importFrom dplyr mutate
+#'
+#' @examples
+trk_mutate_dplyr <- function(track) {
+  first_time <- track[1, "time"] %>% pull
+  mutate(track,
+    lat_prev = lag(lat, 1),
+    lon_prev = lag(lon, 1),
+    seg_dist = haversine(lat, lon, lat_prev, lon_prev),
+    elapsed = as.integer(time - first_time),
+    elapsed_prev = lag(elapsed, 1),
+    seg_elapsed = elapsed - elapsed_prev,
+    kph = seg_dist / seg_elapsed * 3.6
+  ) %>%
+    select(-ends_with("_prev"))
+}
+
+#' Mutate a track (base R implementation)
+#' Add derived variables: distance from previous trackpoint,
+#' elapsed time since last trackpoint, speed (kph), bearing.
+#'
+#' @param track a data.frame with 3 cols: 'lat', 'lon', 'time'
+#'
+#' @return data.frame
 #' @export
 #'
 #' @examples
-dist_from_start <- function(track, route = NULL) {
-  if (is.null(route))  {
-    haversine(coord_first(track)[1], coord_first(track)[2],
-              coord_last(track)[1],  coord_last(track)[2])
-  } else {
-    haversine(coord_first(route)[1], coord_first(route)[2],
-              coord_last(track)[1],  coord_last(track)[2])
-  }
+trk_mutate <- function(track) {
+  rows <- nrow(track) - 1
+  track$lat_prev <- c(NA, head(track$lat, rows))
+  track$lon_prev <- c(NA, head(track$lon, rows))
+  track$seg_dist <- haversine(track$lat, track$lon, track$lat_prev, track$lon_prev)
+  track$elapsed = as.integer(track$time - head(track$time, 1))
+  track$elapsed_prev = c(NA, head(track$elapsed, rows))
+  track$seg_elapsed = track$elapsed - track$elapsed_prev
+  track$kph = track$seg_dist / track$seg_elapsed * 3.6
+  track$bearing = bearing(track$lat, track$lon, track$lat_prev, track$lon_prev)
+  track[, names(track)[!endsWith(names(track), "_prev")]]
+}
+
+head1 <- function(d) head(d, 1)
+tail1 <- function(d) tail(d, 1)
+
+#' Extract coordinates from route or track
+#'
+#' @param track data.frame
+#' @param func function, e.g., min, max, mean
+#'
+#' @return c(lat, lon)
+#' @export
+#'
+#' @examples
+extract_coord <- function(track, func) {
+  FUN = match.fun(func)
+  c(FUN(track$lat), FUN(track$lon))
+}
+
+#' Distance from first to last trackpoint (straight line)
+#'
+#' @param track
+#'
+#' @return dbl meters
+#' @export
+#'
+#' @examples
+dist_from_start <- function(track) {
+  start <- extract_coord(track, head1)
+  current <- extract_coord(track, tail1)
+  haversine(start[1], start[2], current[1], current[2])
 }
 
 #' Distance between current position and finish
@@ -109,49 +128,25 @@ dist_from_start <- function(track, route = NULL) {
 #' @param track
 #' @param route
 #'
-#' @return meters
+#' @return dbl meters
 #' @export
 #'
 #' @examples
 dist_to_finish <- function(track, route) {
-  haversine(coord_last(track)[1], coord_last(track)[2],
-            coord_last(route)[1],  coord_last(route)[2])
+  current <- extract_coord(track, tail1)
+  finish <- extract_coord(route, tail1)
+  haversine(start[1], start[2], current[1], current[2])
 }
 
-#' Calculate speed
+#' Total track distance (sum of trackpoints)
 #'
-#' @param meters
-#' @param seconds
-#'
-#' @return meters per second
-#' @export
-#'
-#' @examples
-speed <- function(meters, seconds) {
-  meters / seconds
-}
-
-#' Total track distance
-#' Sum of distances between trackpoints
-#'
-#' @param track
-#' @param mut_track
+#' @param mut_track mutated track (via trk_mutate)
 #'
 #' @return meters
 #' @export
 #'
 #' @examples
-trk_dist <- function(track = NULL, track_mut = NULL) {
-  if (!is.null(track_mut)) {
-    sum(track_mut$dist, na.rm = T)
-  } else {
-    rows <- nrow(track) - 1
-    track$lat_prev <- c(NA, head(track$lat, rows))
-    track$lon_prev <- c(NA, head(track$lon, rows))
-    track$dist <- haversine(track$lat, track$lon, track$lat_prev, track$lon_prev)
-    sum(track$dist, na.rm = TRUE)
-  }
-}
+trk_dist <- function(track_mut) sum(track_mut$seg_dist, na.rm = T)
 
 trk_dist2 <- function(route) {  # recursive
   total <- 0
@@ -168,31 +163,31 @@ trk_dist2 <- function(route) {  # recursive
   total + haversine(lat1, lon1, lat2, lon2)
 }
 
-#' Estimated time (in seconds) remaining to finish
+#' Estimated time remaining to finish
 #'
-#' @param track_mut
-#' @param meters_to_fin
+#' @param track_mut via trk_mutate()
+#' @param meters_remain to finish
 #'
-#' @return seconds
+#' @return dbl seconds
 #' @export
 #'
 #' @examples
-time_remain <- function(track_mut, meters_to_fin) {
+time_remain <- function(track_mut, meters_remain) {
   recentSpeed <- mean(tail(track_mut$kph, 5)) # last 5 trackpoints
   (meters_to_fin / 1000) / (recentSpeed * 3600)
 }
 
-#' Estimated finish time
+#' Estimated time of arrival
 #'
 #' @param track_mut
 #' @param route
 #'
-#' @return POSIXct
+#' @return POSIXct arrival time
 #' @export
 #'
 #' @examples
-finish_time <- function(track_mut, route) {
-  last_time <- tail(track_mut$time, 1)
+ETA <- function(track_mut, route) {
+  last_time <- tail1(track_mut$time)
   last_time + time_remain(track_mut, dist_to_finish(track_mut, route))
 }
 

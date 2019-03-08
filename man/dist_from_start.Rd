@@ -2,16 +2,16 @@
 % Please edit documentation in R/distance_speed.R
 \name{dist_from_start}
 \alias{dist_from_start}
-\title{Distance from start, in a straight line}
+\title{Distance from first to last trackpoint (straight line)}
 \usage{
-dist_from_start(track, route = NULL)
+dist_from_start(track)
 }
 \arguments{
-\item{route}{}
+\item{track}{}
 }
 \value{
-meters
+dbl meters
 }
 \description{
-Distance from start, in a straight line
+Distance from first to last trackpoint (straight line)
 }

@@ -2,18 +2,16 @@
 % Please edit documentation in R/distance_speed.R
 \name{trk_dist}
 \alias{trk_dist}
-\title{Total track distance
-Sum of distances between trackpoints}
+\title{Total track distance (sum of trackpoints)}
 \usage{
-trk_dist(track = NULL, track_mut = NULL)
+trk_dist(track_mut)
 }
 \arguments{
-\item{mut_track}{}
+\item{mut_track}{mutated track (via trk_mutate)}
 }
 \value{
 meters
 }
 \description{
-Total track distance
-Sum of distances between trackpoints
+Total track distance (sum of trackpoints)
 }

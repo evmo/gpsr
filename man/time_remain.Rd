@@ -2,16 +2,18 @@
 % Please edit documentation in R/distance_speed.R
 \name{time_remain}
 \alias{time_remain}
-\title{Estimated time (in seconds) remaining to finish}
+\title{Estimated time remaining to finish}
 \usage{
-time_remain(track_mut, meters_to_fin)
+time_remain(track_mut, meters_remain)
 }
 \arguments{
-\item{meters_to_fin}{}
+\item{track_mut}{via trk_mutate()}
+
+\item{meters_remain}{to finish}
 }
 \value{
-seconds
+dbl seconds
 }
 \description{
-Estimated time (in seconds) remaining to finish
+Estimated time remaining to finish
 }

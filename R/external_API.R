@@ -7,6 +7,10 @@
 #'
 #' @return A data.frame with three columns: lat (latitude), lon (longitude),
 #'  time (timestamp)
+#'
+#' @importFrom jsonlite fromJSON
+#' @import dplyr
+#'
 #' @export
 #'
 #' @references \url{http://faq.findmespot.com/index.php?action=showEntry&data=69}
@@ -14,7 +18,7 @@
 read_spot <- function(id, all = FALSE, password = NULL) {
 
   # grab the relevant columns from the full SPOT feed
-  reduce <- function(df) {
+  get_cols <- function(df) {
     df %>%
       select(lat = ends_with('latitude'),
              lon = ends_with('longitude'),
@@ -38,11 +42,11 @@ read_spot <- function(id, all = FALSE, password = NULL) {
   if (!is.null(resp$response$errors))
     stop(resp$response$errors$error$description)
   else
-    msgs <- resp %>% as.data.frame
+    msgs <- as.data.frame(resp)
 
   count <- select(msgs, ends_with('totalCount'))[1, 1]
   pages <- (count - 1) %/% 50 + 1
-  data <- msgs %>% reduce
+  data <- get_cols(msgs)
 
   if (all == TRUE && pages > 1) {
     # a single page of SPOT tracks is 50 trackpoints;
@@ -54,13 +58,13 @@ read_spot <- function(id, all = FALSE, password = NULL) {
       nextUrl <- paste(urlbase, id, urltail, startUrl, sep='')
       if (!is.null(password))
         nextUrl <- paste0(nextUrl, '&feedPassword=', password)
-      nextMsgs <- fromJSON(nextUrl) %>% as.data.frame %>% reduce
+      nextMsgs <- fromJSON(nextUrl) %>% as.data.frame %>% get_cols
       # append pages X's data to page 1's data
       data <- rbind(data, nextMsgs)
     }
   }
 
-  return(data %>% arrange(time))
+  arrange(data, time)
 }
 
 #' Read data from DeLorme inReach API

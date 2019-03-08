@@ -10,7 +10,7 @@ dist_to_finish(track, route)
 \item{route}{}
 }
 \value{
-meters
+dbl meters
 }
 \description{
 Distance between current position and finish
