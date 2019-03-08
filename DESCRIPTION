@@ -1,4 +1,4 @@
-Package: Rgps
+Package: gpsr
 Type: Package
 Title: Functions for Munging GPS Tracking Data
 Version: 0.1.0
