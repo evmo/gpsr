@@ -1,12 +1,12 @@
-#' Convert seconds to hours:minutes:seconds
+#' Seconds to c(H, M, S)
 #'
 #' @param seconds
 #'
-#' @return Vector of c(hours, minutes, seconds)
+#' @return vector c(H, M, S)
 #' @export
 #'
 #' @examples
-secs_to_HMS <- function(seconds) {
+sec2hms_v <- function(seconds) {
   hrs <- seconds %/% 3600
   min <- (seconds - hrs * 3600) %/% 60
   sec <- seconds - (min * 60 + hrs * 3600)
@@ -22,8 +22,8 @@ secs_to_HMS <- function(seconds) {
 #'
 #' @examples
 p_sec_HM <- function(seconds) {
-    HM <- secs_to_HMS(seconds)[1:2]
-    paste0(HM[1], "H ", HM[2], "M")
+    HM <- sec2hms_v(seconds)[1:2]
+    sprintf("%sH %sM", HM[1], HM[2])
 }
 
 #' Elapsed time of track
@@ -38,9 +38,8 @@ trk_elapsed_sec <- function(track) {
   as.integer(tail(track$time, 1)) - as.integer(head(track$time, 1))
 }
 
-#' Print elapsed time of track
+#' Print elapsed time of track ([H]H:MM)
 #'
-#' Displays in Hours:Minutes
 #' @param track
 #'
 #' @return String - e.g., 12:20
@@ -48,11 +47,9 @@ trk_elapsed_sec <- function(track) {
 #'
 #' @examples
 p_trk_elapsed_HM <- function(track) {
-  paste0(
-    secs_to_HMS(
-      trk_elapsed_sec(track))[1], ":",
-    sprintf("%02.f",
-      secs_to_HMS(trk_elapsed_sec(track))[2]))
+  hours <- sec2hms_v(trk_elapsed_sec(track))[1]
+  minutes <- sec2hms_v(trk_elapsed_sec(track))[2]
+  sprintf("%s:%02.f", hours, minutes)
 }
 
 #' Elapsed time since last trackpoint

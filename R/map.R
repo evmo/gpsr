@@ -102,8 +102,7 @@ add_map_labels <- function(map, data, labels, legendGroup = NULL, ...) {
 #' @param save
 #'
 #' @return leaflet map
-#' @importFrom leaflet leaflet addProviderTiles addLayersControl
-#' providerTileOptions markerOptions labelOptions
+#' @import leaflet
 #' @importFrom htmlwidgets saveWidget
 #' @export
 #'
