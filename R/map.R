@@ -143,7 +143,38 @@ map_gps <- function(track = NULL,
   return(map)
 }
 
-# label = format(track$time + 3600 * hours_from_GMT, "%H:%M")
+map_track <- function(track, tz_offset) {
+  base_map() %>%
+    map_path_points(data = track) %>%
+    map_path_lines(data = track) %>%
+    add_map_labels(
+      data = track, 
+      labels = format(track$time + tz_offset * 3600, "%H:%M")
+    )
+}
+
+map_embedded <- function(track_file, reduce = "30 min", 
+                          tz_offset = -4, save = T) {
+  map <- readr::read_csv(track_file) %>%
+    trk_reduce(reduce) %>%
+    map_track(tz_offset = tz_offset)
+
+  if (save == TRUE) 
+    saveWidget(map, 'map.html', selfcontained = T)
+  else 
+    assign("map", map, envir = .GlobalEnv)
+}
+
+# mkMap <- function(folder, reduce = "30 min", tz_offset = -4, save = T) {
+#   d <- readr::read_csv(file.path(folder, "track.csv")) %>%
+#     trk_reduce(reduce)
+#   m <- base_map() %>%
+#     map_path(d,
+#              labels = format(d$time + tz_offset * 3600, "%H:%M"),
+#              circleColor = 'red')
+#   if (save == TRUE) saveWidget(m, 'map.html', selfcontained = T)
+#   else assign("map", m, envir = .GlobalEnv)
+# }
 
 map_traccar <- function(deviceid, start_time, stop_time,
                         db, host, port, user, password) {
