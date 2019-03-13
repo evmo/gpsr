@@ -2,7 +2,7 @@
 % Please edit documentation in R/time.R
 \name{p_trk_elapsed_HM}
 \alias{p_trk_elapsed_HM}
-\title{Print elapsed time of track}
+\title{Print elapsed time of track ([H]H:MM)}
 \usage{
 p_trk_elapsed_HM(track)
 }
@@ -13,5 +13,5 @@ p_trk_elapsed_HM(track)
 String - e.g., 12:20
 }
 \description{
-Displays in Hours:Minutes
+Print elapsed time of track ([H]H:MM)
 }

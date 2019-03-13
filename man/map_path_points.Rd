@@ -2,17 +2,21 @@
 % Please edit documentation in R/map.R
 \name{map_path_points}
 \alias{map_path_points}
-\title{Map Path Points}
+\title{Add path points to map}
 \usage{
 map_path_points(map, data, legendGroup = NULL, circleColor = "#FF4900",
   circleRadius = 50, ...)
 }
 \arguments{
+\item{map}{leaflet map}
+
+\item{data}{track data}
+
 \item{...}{}
 }
 \value{
 map
 }
 \description{
-Map Path Points
+Add path points to map
 }
