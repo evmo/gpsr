@@ -1,0 +1,58 @@
+---
+title: "Mapping"
+author: "Evan Morrison"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+`r library(gpsr)`
+
+## Loading base maps
+
+```{r}
+# Default constructor
+base_map()
+
+# Single tileset
+base_map(provider_tiles = "Esri.NatGeoWorldMap")
+base_map(custom_tiles = NOAA_TILES)
+
+# Multiple tilsets, with options
+base_map(
+  provider_tiles = c("Esri.NatGeoWorldMap", "Esri.WorldImagery")
+  ,custom_tiles = NOAA_TILES
+  ,p_tile_opts = list(list(attribution="foo"), list(attribution="bar"))
+  ,c_tile_opts = list(list(crossOrigin = FALSE))
+  ,p_tile_labs = c("standard", "satellite")
+  ,c_tile_labs = "NOAA"
+)
+```
+
+## Mapping a track
+
+```{r}
+# Load example track data
+data("mignosa")
+head(track)
+
+trk_map(
+  track = track,
+  freq = "30 min",
+  tz_offset = -7,
+  provider_tiles = c("Stamen.Toner", "Stamen.Watercolor"),
+  custom_tiles = noaa,
+  p_tile_labs = c("B/W", "color"),
+  c_tile_labs = "NOAA"
+)
+```
