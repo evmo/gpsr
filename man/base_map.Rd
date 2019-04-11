@@ -4,12 +4,24 @@
 \alias{base_map}
 \title{Create a blank map}
 \usage{
-base_map(providers = NULL, labels = NULL)
+base_map(provider_tiles = NULL, custom_tiles = NULL,
+  p_tile_opts = list(), c_tile_opts = list(), p_tile_labs = NULL,
+  c_tile_labs = NULL, proxy_map_id = NULL)
 }
 \arguments{
-\item{providers}{character vector of tile providers}
+\item{provider_tiles}{character vector of known map providers}
 
-\item{labels}{character vector of provider labels}
+\item{custom_tiles}{character vector of URLs of custom tiles}
+
+\item{p_tile_opts}{list of providerTileOptions for the provider tiles}
+
+\item{c_tile_opts}{list of tileOptions for the custom tiles}
+
+\item{p_tile_labs}{character vector of labels for the provider tiles}
+
+\item{c_tile_labs}{character vector of labels for the custom tiles}
+
+\item{proxy_map_id}{map ID of a leaflet map if called from a Shiny app}
 }
 \value{
 map
