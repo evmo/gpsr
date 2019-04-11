@@ -1,33 +1,112 @@
 #' Create a blank map
 #'
-#' @param providers character vector of tile providers
-#' @param labels character vector of provider labels
+#' @param provider_tiles character vector of known map tile providers
+#' @param custom_tiles character vector of URLs of custom tiles
+#' @param p_tile_opts list of providerTileOptions for the provider tiles
+#' @param c_tile_opts list of tileOptions for the custom tiles
+#' @param p_tile_labs character vector of labels for the provider tiles
+#' @param c_tile_labs character vector of labels for the custom tiles
+#' @param proxy_map_id map ID of a leaflet map if called from a Shiny app
 #'
-#' @return map
+#' @return map a leaflet map
 #' @import leaflet
 #' @importFrom magrittr '%<>%'
 #' @export
 #'
 #' @examples
-base_map <- function(providers = NULL, labels = NULL) {
-  map <- leaflet()
+base_map <- function(provider_tiles = NULL, custom_tiles = NULL,
+   p_tile_opts = list(), c_tile_opts = list(),
+   p_tile_labs = NULL, c_tile_labs = NULL,
+   proxy_map_id = NULL) {
 
-  if (is.null(providers))
+  # validate args
+  if (!missing(p_tile_opts))
+    stopifnot(length(p_tile_opts) == length(provider_tiles))
+  if (!missing(p_tile_labs))
+    stopifnot(length(p_tile_labs) == length(provider_tiles))
+  if (!missing(c_tile_opts))
+    stopifnot(length(c_tile_opts) == length(custom_tiles))
+  if (!missing(c_tile_labs))
+    stopifnot(length(c_tile_labs) == length(custom_tiles))
+
+  # are we modifying an existing map in a Shiny app?
+  if (missing(proxy_map_id))
+    map <- leaflet()
+  else
+    map <- leafletProxy(proxyMapId = proxy_map_id)
+
+  n_p_tiles <- length(provider_tiles)
+  n_c_tiles <- length(custom_tiles)
+  n_tilesets <- n_p_tiles + n_c_tiles
+
+  # no tiles provided by user
+  if (n_tilesets == 0)
     map %<>% addTiles
-  else if (length(providers) == 1) {
-    map %<>%
-      addProviderTiles(
-        providers,
-        options = providerTileOptions(attribution = "")
-      )
+  # one tileset
+  else if (n_tilesets == 1) {
+    # leaflet provider
+    if (n_p_tiles == 1) {
+      map %<>%
+        addProviderTiles(
+          provider = provider_tiles,
+          options = providerTileOptions(p_tile_opts)
+        )
+    } else {
+      # custom tileset
+      map %<>%
+        addTiles(
+          urlTemplate = custom_tiles,
+          options = tileOptions(c_tile_opts)
+        )
+    }
+  # multiple providers
   } else {
-    purrr::walk2(providers, labels, function(p, l) {
-      map <<- map %>%
-        addProviderTiles(p, group = l, options =
-                           providerTileOptions(attribution = ""))
-    })
-    map %<>% addLayersControl(baseGroups = labels)
-  }
+    # tileset labels default to name of tileset
+    if (missing(p_tile_labs) && missing(c_tile_labs)) {
+      p_tile_labs <- provider_tiles
+      c_tile_labs <- custom_tiles
+    }
+
+    # if no options provided, provide empty list
+    if (length(p_tile_opts) == 0)
+      pto <- rep(list(list()), length(provider_tiles))
+    else
+      pto <- p_tile_opts
+    if (length(c_tile_opts) == 0)
+      cto <- rep(list(list()), length(custom_tiles))
+    else
+      cto <- c_tile_opts
+
+    # iteratively add each tileset to the map
+    if (n_p_tiles >= 1) {
+      purrr::pwalk(list(provider_tiles, p_tile_labs, pto),
+        function(tiles, labs, opts) {
+          map <<- map %>%
+            addProviderTiles(
+              provider = tiles,
+              group = labs,
+              options = do.call(providerTileOptions, opts)
+            )
+        }
+      )
+    }
+
+    if (n_c_tiles >= 1) {
+      purrr::pwalk(list(custom_tiles, c_tile_labs, cto),
+        function(tiles, labs, opts) {
+          map <<- map %>%
+            addTiles(
+              urlTemplate = tiles,
+              group = labs,
+              options = do.call(tileOptions, opts)
+            )
+        }
+      )
+    }
+
+    # add the tile selector
+    map %<>% addLayersControl(baseGroups = c(p_tile_labs, c_tile_labs))
+  }  #  end if/else
 
   return(map)
 }
@@ -46,13 +125,15 @@ base_map <- function(providers = NULL, labels = NULL) {
 #'
 #' @examples
 map_path_points <- function(map, data, legendGroup = NULL, circleColor = "#FF4900",
-                            circleRadius = 50, ...) {
-  map %>% leaflet::addCircles(
+                            circleRadius = 5, ...) {
+  map %>% leaflet::addCircleMarkers(
     data$lon,
     data$lat,
     group = legendGroup,
     color = circleColor,
     radius = circleRadius,
+    fillOpacity = 0.7,
+    stroke = FALSE,
     ...
   )
 }
@@ -76,7 +157,7 @@ map_path_lines <- function(map, data, legendGroup = NULL,
     data$lat,
     group = legendGroup,
     color = lineColor,
-    weight = 3,
+    weight = 2,
     ...
   )
 }
@@ -118,10 +199,15 @@ add_map_labels <- function(map, data, labels, legendGroup = NULL, ...) {
 #' @export
 #'
 #' @examples
-map_track <- function(track, freq = "60 min", tz_offset = 0, providers = NULL,
-                      labels = NULL, circleColor = NULL, lineColor = NULL) {
+trk_map <- function(track, freq = "60 min", tz_offset = 0,
+  provider_tiles = NULL, custom_tiles = NULL,
+  p_tile_opts = list(), c_tile_opts = list(),
+  p_tile_labs = NULL, c_tile_labs = NULL,
+  labels = NULL, circleColor = NULL, lineColor = NULL) {
+
   t = trk_reduce(track, freq)
-  base_map(providers, labels) %>%
+  base_map(provider_tiles, custom_tiles, p_tile_opts, c_tile_opts,
+           p_tile_labs, c_tile_labs) %>%
     map_path_points(data = t, circleColor) %>%
     map_path_lines(data = t, lineColor) %>%
     add_map_labels(
@@ -136,3 +222,5 @@ map_track <- function(track, freq = "60 min", tz_offset = 0, providers = NULL,
 #                     db, host, port, user, password)
 #   map_gps(d)
 # }
+
+NOAA_TILES <- "http://tileservice.charts.noaa.gov/tiles/50000_1/{z}/{x}/{y}.png"

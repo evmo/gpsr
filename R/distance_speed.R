@@ -146,7 +146,9 @@ dist_to_finish <- function(track, route) {
 #' @export
 #'
 #' @examples
-trk_dist <- function(track_mut) sum(track_mut$seg_dist, na.rm = T)
+trk_dist <- function(track_mut) {
+  sum(track_mut$seg_dist, na.rm = T)
+}
 
 trk_dist2 <- function(route) {  # recursive
   total <- 0
