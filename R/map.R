@@ -190,10 +190,15 @@ add_map_labels <- function(map, data, labels, legendGroup = NULL, ...) {
 #' @param track track data
 #' @param freq frequency for trk_reduce
 #' @param tz_offset hours offset from GMT
-#' @param providers
-#' @param labels
-#' @param circleColor
-#' @param lineColor
+#' @param provider_tiles character vector of known map tile providers
+#' @param custom_tiles character vector of URLs of custom tiles
+#' @param p_tile_opts list of providerTileOptions for the provider tiles
+#' @param c_tile_opts list of tileOptions for the custom tiles
+#' @param p_tile_labs character vector of labels for the provider tiles
+#' @param c_tile_labs character vector of labels for the custom tiles
+#' @param labels labels for each trackpoint
+#' @param circleColor color of each trackpoint
+#' @param lineColor color line connecting the trackpoints
 #'
 #' @return
 #' @export

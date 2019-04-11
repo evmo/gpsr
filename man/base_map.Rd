@@ -9,7 +9,7 @@ base_map(provider_tiles = NULL, custom_tiles = NULL,
   c_tile_labs = NULL, proxy_map_id = NULL)
 }
 \arguments{
-\item{provider_tiles}{character vector of known map providers}
+\item{provider_tiles}{character vector of known map tile providers}
 
 \item{custom_tiles}{character vector of URLs of custom tiles}
 
@@ -24,7 +24,7 @@ base_map(provider_tiles = NULL, custom_tiles = NULL,
 \item{proxy_map_id}{map ID of a leaflet map if called from a Shiny app}
 }
 \value{
-map
+map a leaflet map
 }
 \description{
 Create a blank map

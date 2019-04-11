@@ -16,7 +16,23 @@ trk_map(track, freq = "60 min", tz_offset = 0, provider_tiles = NULL,
 
 \item{tz_offset}{hours offset from GMT}
 
-\item{lineColor}{}
+\item{provider_tiles}{character vector of known map tile providers}
+
+\item{custom_tiles}{character vector of URLs of custom tiles}
+
+\item{p_tile_opts}{list of providerTileOptions for the provider tiles}
+
+\item{c_tile_opts}{list of tileOptions for the custom tiles}
+
+\item{p_tile_labs}{character vector of labels for the provider tiles}
+
+\item{c_tile_labs}{character vector of labels for the custom tiles}
+
+\item{labels}{labels for each trackpoint}
+
+\item{circleColor}{color of each trackpoint}
+
+\item{lineColor}{color line connecting the trackpoints}
 }
 \description{
 Create a map of a track
