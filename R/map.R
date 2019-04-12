@@ -228,4 +228,3 @@ trk_map <- function(track, freq = "60 min", tz_offset = 0,
 #   map_gps(d)
 # }
 
-NOAA_TILES <- "http://tileservice.charts.noaa.gov/tiles/50000_1/{z}/{x}/{y}.png"
