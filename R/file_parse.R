@@ -1,7 +1,17 @@
-parseSource <- function(gpxFile) {
-    xml2::read_html(gpxFile) %>%
-        xml2::xml_node('gpx') %>%
-        xml2::xml_attr('creator')
+#' Parse creator of a GPX file
+#'
+#' @param gpxFile File path of the file to be parsed
+#'
+#' @return
+#' @import xml2
+#' @importFrom magrittr "%>%"
+#' @export
+#'
+#' @examples
+gpx_creator <- function(gpxFile) {
+    read_html(gpxFile) %>%
+        xml_node('gpx') %>%
+        xml_attr('creator')
 }
 
 parseDateTime <- function(datetimes) {
@@ -42,13 +52,12 @@ parseDateTime <- function(datetimes) {
 
 #' Read GPX file
 #'
-#' @param gpx_file
+#' @param gpxFile
 #'
-#' @return data.frame
+#' @return tibble
 #' @export
-#' @import xml2
+#' @import xml2 tibble anytime
 #' @importFrom magrittr "%>%"
-#' @importFrom dplyr mutate arrange
 #'
 #' @examples
 read_gpx <- function(gpxFile) {
@@ -57,16 +66,11 @@ read_gpx <- function(gpxFile) {
     lon <- xml_find_all(msgs, ".//trkpt") %>% xml_attr("lon")
     time <- xml_find_all(msgs, ".//trkseg//time") %>% xml_text
 
-    time <- parseDateTime(time)
-
-    if (is.null(time)) {
-        return(NULL)
-    } else {
-        data.frame(lat, lon, time, stringsAsFactors = F) %>%
-            mutate(lat = as.numeric(lat)) %>%
-            mutate(lon = as.numeric(lon)) %>%
-            arrange(time)
-    }
+    tibble(
+      lat = as.numeric(lat),
+      lon = as.numeric(lon),
+      time = anytime(time)
+    ) %>% arrange(time)
 }
 
 #' Read TCX file
@@ -96,20 +100,15 @@ read_tcx <- function(tcxFile) {
 #'
 #' @param csv_file
 #'
-#' @return data.frame
-#' @import dplyr
+#' @return tibble
+#' @import readr dplyr anytime
 #' @export
 #'
 #' @examples
-read_spot_csv <- function(csvFile) {
-    read.csv(csvFile, header = F, colClasses = c(
-                rep("character", 3),
-                rep("numeric", 2),
-                rep("character", 2))) %>%
-        select(-c(V2, V3, V6, V7)) %>%
-        rename(lat = V4, lon = V5, time = V1) %>%
-        mutate(time = as.POSIXct(time, tz = 'GMT',
-                                format = '%m/%d/%Y %H:%M:%S')) %>%
-        select(lat, lon, time) %>%
+read_spot_csv <- function(csv_file) {
+    read_csv(csvFile, col_names = F) %>%
+        select(X1, X4, X5) %>%
+        rename(lat = X4, lon = X5, time = X1) %>%
+        mutate(time = anytime(time)) %>%
         arrange(time)
 }

@@ -4,13 +4,13 @@
 \alias{read_spot_csv}
 \title{Read SPOT-exported track in CSV format}
 \usage{
-read_spot_csv(csvFile)
+read_spot_csv(csv_file)
 }
 \arguments{
 \item{csv_file}{}
 }
 \value{
-data.frame
+tibble
 }
 \description{
 Read SPOT-exported track in CSV format

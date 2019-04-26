@@ -7,10 +7,10 @@
 read_gpx(gpxFile)
 }
 \arguments{
-\item{gpx_file}{}
+\item{gpxFile}{}
 }
 \value{
-data.frame
+tibble
 }
 \description{
 Read GPX file
