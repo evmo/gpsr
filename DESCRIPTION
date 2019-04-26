@@ -13,7 +13,8 @@ Imports:
     measurements,
     leaflet,
     dplyr,
-    geosphere
+    geosphere,
+    anytime
 RoxygenNote: 6.1.1
 Suggests: 
     knitr,

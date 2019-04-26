@@ -121,3 +121,19 @@ read_traccar <- function(deviceid, start_time, stop_time,
   if (nrow(res) == 0) stop("No rows available")
   else return(res)
 }
+
+#' Get timezone from lat/lon coordinates via Google Timezone API
+#'
+#' @param lat latitude (double)
+#' @param lon longitude (double)
+#' @param api_key Google Timezone API key
+#'
+#' @return timezone ID (character vector)
+#' @export
+#'
+#' @examples
+coord2tz <- function(lat, lon, api_key) {
+  baseurl <- 'https://maps.googleapis.com/maps/api/timezone/json?location='
+  url <- glue::glue("{baseurl}{lat},{lon}&timestamp=0&key={api_key}")
+  jsonlite::fromJSON(url)$timeZoneId
+}
