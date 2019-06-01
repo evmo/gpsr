@@ -137,3 +137,21 @@ coord2tz <- function(lat, lon, api_key) {
   url <- glue::glue("{baseurl}{lat},{lon}&timestamp=0&key={api_key}")
   jsonlite::fromJSON(url)$timeZoneId
 }
+
+#' Read YB Tracking
+#'
+#' @param event_id
+#'
+#' @return tibble, 3 cols: lat, lon, time
+#' @import dplyr
+#' @export
+#'
+#' @examples
+read_yb <- function(cust_id, event_id) {
+  base_url <- 'https://app.yb.tl/APIX/Blog/GetPositions?keyword=%s&event=%s'
+  url <- sprintf(base_url, cust_id, event_id)
+  jsonlite::fromJSON(url)$positions %>%
+    mutate(time = anytime::anytime(at / 1000)) %>%
+    rename(lat = t, lon = g) %>%
+    select(lat, lon, time)
+}
