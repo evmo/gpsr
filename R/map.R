@@ -180,7 +180,7 @@ add_map_labels <- function(map, data, labels, legendGroup = NULL, ...) {
     data$lat,
     label = labels,
     group = legendGroup,
-    labelOptions = labelOptions(offset = c(15, -15), ...),
+    labelOptions = labelOptions(...),
     options = markerOptions(opacity = 0)
   )
 }
