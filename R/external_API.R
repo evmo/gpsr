@@ -148,10 +148,27 @@ coord2tz <- function(lat, lon, api_key) {
 #'
 #' @examples
 read_yb <- function(cust_id, event_id) {
-  base_url <- 'https://app.yb.tl/APIX/Blog/GetPositions?keyword=%s&event=%s'
-  url <- sprintf(base_url, cust_id, event_id)
+  url_tpl <- 'https://app.yb.tl/APIX/Blog/GetPositions?keyword=%s&event=%s'
+  url <- sprintf(url_tpl, cust_id, event_id)
   jsonlite::fromJSON(url)$positions %>%
     mutate(time = anytime::anytime(at / 1000)) %>%
     rename(lat = t, lon = g) %>%
     select(lat, lon, time)
+}
+
+#' Read Garmin Connect
+#'
+#' @param activity
+#'
+#' @return
+#' @import dplyr
+#' @export
+#'
+#' @examples
+read_garmin_connect <- function(activity_id, code) {
+  url_tpl <- 'https://connect.garmin.com/modern/proxy/activity-service/activity/%s/details?_=%s'
+  url <- sprintf(url_tpl, activity_id, code)
+  jsonlite::fromJSON(url)$geoPolylineDTO$polyline %>%
+    select(lat, lon, time) %>%
+    mutate(time = anytime::anytime(time / 1000))
 }
