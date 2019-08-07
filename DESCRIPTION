@@ -14,7 +14,8 @@ Imports:
     leaflet,
     dplyr,
     geosphere,
-    anytime
+    anytime,
+    data.table
 RoxygenNote: 6.1.1
 Suggests: 
     knitr,
