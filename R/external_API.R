@@ -9,7 +9,7 @@
 #'  time (timestamp)
 #'
 #' @importFrom jsonlite fromJSON
-#' @import dplyr
+#' @importFrom dplyr select mutate arrange '%>%'
 #'
 #' @export
 #'
@@ -143,7 +143,7 @@ coord2tz <- function(lat, lon, api_key) {
 #' @param event_id
 #'
 #' @return tibble, 3 cols: lat, lon, time
-#' @import dplyr
+#' @importFrom dplyr mutate rename select '%>%'
 #' @export
 #'
 #' @examples
@@ -161,7 +161,7 @@ read_yb <- function(cust_id, event_id) {
 #' @param activity
 #'
 #' @return
-#' @import dplyr
+#' @importFrom dplyr select mutate '%>%'
 #' @export
 #'
 #' @examples

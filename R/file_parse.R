@@ -101,7 +101,8 @@ read_tcx <- function(tcxFile) {
 #' @param csv_file
 #'
 #' @return tibble
-#' @import readr dplyr anytime
+#' @import readr anytime
+#' @importFrom dplyr select rename mutate arrange '%>%'
 #' @export
 #'
 #' @examples
