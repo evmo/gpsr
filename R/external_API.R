@@ -172,3 +172,25 @@ read_garmin_connect <- function(activity_id, code) {
     select(lat, lon, time) %>%
     mutate(time = anytime::anytime(time / 1000))
 }
+
+#' Read from MarineTraffic historical positions API
+#'
+#' @param api_key
+#' @param mmsi
+#' @param from_date
+#'
+#' @return
+#' @importFrom dplyr select
+#' @importFrom glue glue
+#' @importFrom readr read_csv write_csv
+#' @export
+#'
+#' @examples
+read_MT_hist <- function(api_key, mmsi, from_date, outfile) {
+  baseurl <- 'https://services.marinetraffic.com/api/exportvesseltrack/v:2'
+  url <- glue('{baseurl}/{key}/mmsi:{mmsi}/fromdate:{from_date}/protocol:csv')
+  read_csv(url) %>%
+    select(lat = LAT, lon = LON, time = TIMESTAMP) %>%
+    trk_reduce('10 min') %>%
+    write_csv(outfile)
+}
