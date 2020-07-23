@@ -9,6 +9,9 @@ gpx_creator(gpxFile)
 \arguments{
 \item{gpxFile}{File path of the file to be parsed}
 }
+\value{
+
+}
 \description{
 Parse creator of a GPX file
 }

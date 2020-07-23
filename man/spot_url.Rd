@@ -9,6 +9,9 @@ spot_url(id, start = 0, password = NULL)
 \arguments{
 \item{password}{}
 }
+\value{
+
+}
 \description{
 Construct SPOT API request URL
 }

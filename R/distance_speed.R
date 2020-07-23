@@ -45,6 +45,22 @@ bearing <- function (lat1, lon1, lat2, lon2) {
   bear %% (2 * pi) * (180 / pi)
 }
 
+#' Calculate route distance
+#'
+#' @param route df with 2 cols, lat and lon
+#'
+#' @return
+#' @export
+#'
+#' @examples
+route_dist <- function(route) {
+  rows <- nrow(route) - 1
+  route$lat_prev <- c(NA, head(route$lat, rows))
+  route$lon_prev <- c(NA, head(route$lon, rows))
+  route$seg_dist <- haversine(route$lat, route$lon, route$lat_prev, route$lon_prev)
+  sum(route$seg_dist, na.rm = T)
+}
+
 #' Mutate a track (dplyr implementation)
 #' Add derived variables: distance from previous trackpoint,
 #' elapsed time since last trackpoint, speed (kph), bearing.

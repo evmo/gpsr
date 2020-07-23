@@ -4,8 +4,7 @@
 \alias{map_path_lines}
 \title{Add path lines to map}
 \usage{
-map_path_lines(map, data, legendGroup = NULL, lineColor = "#FF4900",
-  ...)
+map_path_lines(map, data, legendGroup = NULL, lineColor = "#FF4900", ...)
 }
 \arguments{
 \item{map}{leaflet map}

@@ -9,6 +9,9 @@ read_garmin_connect(activity_id, code)
 \arguments{
 \item{activity}{}
 }
+\value{
+
+}
 \description{
 Read Garmin Connect
 }

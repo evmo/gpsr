@@ -4,9 +4,15 @@
 \alias{base_map}
 \title{Create a blank map}
 \usage{
-base_map(provider_tiles = NULL, custom_tiles = NULL,
-  p_tile_opts = list(), c_tile_opts = list(), p_tile_labs = NULL,
-  c_tile_labs = NULL, proxy_map_id = NULL)
+base_map(
+  provider_tiles = NULL,
+  custom_tiles = NULL,
+  p_tile_opts = list(),
+  c_tile_opts = list(),
+  p_tile_labs = NULL,
+  c_tile_labs = NULL,
+  proxy_map_id = NULL
+)
 }
 \arguments{
 \item{provider_tiles}{character vector of known map tile providers}

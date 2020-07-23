@@ -9,6 +9,9 @@ spot_cols(msgs)
 \arguments{
 \item{msgs}{}
 }
+\value{
+
+}
 \description{
 Convert raw SPOT messages to lat/lon/time data-frame
 }

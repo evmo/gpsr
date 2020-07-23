@@ -9,6 +9,9 @@ trk_reduce(track, interval)
 \arguments{
 \item{interval}{}
 }
+\value{
+
+}
 \description{
 Reduce trackpoint frequency
 }

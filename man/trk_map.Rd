@@ -4,10 +4,20 @@
 \alias{trk_map}
 \title{Create a map of a track}
 \usage{
-trk_map(track, freq = "60 min", tz_offset = 0, provider_tiles = NULL,
-  custom_tiles = NULL, p_tile_opts = list(), c_tile_opts = list(),
-  p_tile_labs = NULL, c_tile_labs = NULL, labels = NULL,
-  circleColor = NULL, lineColor = NULL)
+trk_map(
+  track,
+  freq = "60 min",
+  tz_offset = 0,
+  provider_tiles = NULL,
+  custom_tiles = NULL,
+  p_tile_opts = list(),
+  c_tile_opts = list(),
+  p_tile_labs = NULL,
+  c_tile_labs = NULL,
+  labels = NULL,
+  circleColor = NULL,
+  lineColor = NULL
+)
 }
 \arguments{
 \item{track}{track data}
@@ -33,6 +43,9 @@ trk_map(track, freq = "60 min", tz_offset = 0, provider_tiles = NULL,
 \item{circleColor}{color of each trackpoint}
 
 \item{lineColor}{color line connecting the trackpoints}
+}
+\value{
+
 }
 \description{
 Create a map of a track

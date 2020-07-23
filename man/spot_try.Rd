@@ -9,6 +9,9 @@ spot_try(url)
 \arguments{
 \item{url}{}
 }
+\value{
+
+}
 \description{
 Read one page of SPOT data
 }

@@ -4,8 +4,14 @@
 \alias{map_path_points}
 \title{Add path points to map}
 \usage{
-map_path_points(map, data, legendGroup = NULL, circleColor = "#FF4900",
-  circleRadius = 5, ...)
+map_path_points(
+  map,
+  data,
+  legendGroup = NULL,
+  circleColor = "#FF4900",
+  circleRadius = 5,
+  ...
+)
 }
 \arguments{
 \item{map}{leaflet map}
