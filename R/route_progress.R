@@ -37,3 +37,26 @@ progressAlong <- function(track, routeDens) {
   # how far along the route line is that point?
   closest$total / routeDist
 }
+
+
+#' Get progress per time interval
+#'
+#' @param track
+#' @param finish_lat
+#' @param finish_lon
+#' @param freq
+#'
+#' @return
+#' @importFrom dplyr mutate '%>%'
+#' @export
+#'
+#' @examples
+progress_per_time <- function(track, finish_lat, finish_lon, freq) {
+  track %>%
+    trk_reduce(freq) %>%
+    mutate(
+      from_finish = haversine(lat, lon, finish_lat, finish_lon),
+      progress = dplyr::lag(from_finish) - from_finish
+    ) %>%
+    select(time, progress)
+}
