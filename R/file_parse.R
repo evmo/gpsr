@@ -113,3 +113,25 @@ read_spot_csv <- function(csv_file) {
         mutate(time = anytime(time)) %>%
         arrange(time)
 }
+
+#' Read SPOT JSON
+#'
+#' @param file_path
+#'
+#' @return
+#' @importFrom purrr map_dbl map_chr pluck
+#' @importFrom lubridate mdy_hms with_tz
+#' @export
+read_spot_json <- function(file_path, tz = "UTC") {
+  positions <- jsonlite::read_json(file_path) |>
+    pluck("d", "Assets", 1, "Positions")
+
+  tibble::tibble(
+    lat =  map_dbl(positions, ~ pluck(.x, "Lat")),
+    lon =  map_dbl(positions, ~ pluck(.x, "Lng")),
+    time = map_chr(positions, ~ pluck(.x, "Time")) |>
+      mdy_hms(tz = tz) |>
+      with_tz("UTC")
+  ) |>
+    dplyr::arrange(time)
+}
