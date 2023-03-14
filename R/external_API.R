@@ -1,3 +1,54 @@
+#' Grab relevant columns from data-frame of SPOT API call
+#'
+#' @param df
+#' @importFrom dplyr select mutate filter arrange
+#'
+#' @return
+#'
+#' @examples
+spot_munge <- function(df) {
+  df |>
+    filter(
+      messageType %in% c("TRACK", "EXTREME-TRACK", "UNLIMITED-TRACK"),
+      dplyr::between(latitude, -180, 180)
+    ) |>
+    select(
+      lat = latitude,
+      lon = longitude,
+      time = dateTime
+    ) |>
+    mutate(
+      time = as.character(time),
+      offset = as.integer(
+        substr(time, nchar(time) - 4, nchar(time) - 2)
+      ),
+      time = as.POSIXct(
+        time,
+        tz = 'GMT',
+        format = '%Y-%m-%dT%H:%M:%S%z'
+      ) + 3600 * offset
+    ) |>
+    select(-offset) |>
+    arrange(time)
+}
+
+#' Read single page of data from the SPOT API
+#'
+#' @param url SPOT API URL
+#'
+#' @return A data.frame with three columns: lat (latitude), lon (longitude),
+#'  time (timestamp)
+#'
+#' @importFrom dplyr as_tibble
+spot_page <- function(url) {
+  resp <- jsonlite::fromJSON(url(url))
+
+  if (!is.null(resp$response$errors))
+    stop(resp$response$errors$error$description)
+
+  as_tibble(resp$response$feedMessageResponse$messages$message) |>
+    spot_munge()
+}
 
 #' Read data from the SPOT API
 #'
@@ -5,48 +56,35 @@
 #' @param all Fetch most recent 50 trackpoint (default) or all available
 #' @param password SPOT feed password
 #'
-#' @return A data.frame with three columns: lat (latitude), lon (longitude),
+#' @return A tibble with three columns: lat (latitude), lon (longitude),
 #'  time (timestamp)
 #'
-#' @importFrom jsonlite fromJSON
-#' @importFrom dplyr select mutate arrange '%>%'
+#' @importFrom dplyr arrange as_tibble
 #'
 #' @export
 #'
 #' @references \url{http://faq.findmespot.com/index.php?action=showEntry&data=69}
 #' @examples
-read_spot <- function(id, all = FALSE, password = NULL) {
+read_spot <- function(feed_id, all = FALSE, password = NULL) {
 
-  # grab the relevant columns from the full SPOT feed
-  get_cols <- function(df) {
-    df %>%
-      select(lat = ends_with('latitude'),
-             lon = ends_with('longitude'),
-             time = ends_with('dateTime')) %>%
-      mutate(time = as.character(time)) %>%
-      mutate(offset = as.integer(substr(
-        time, nchar(time) - 4, nchar(time) - 2))) %>%
-      mutate(time = as.POSIXct(time, tz = 'GMT',
-                               format = '%Y-%m-%dT%H:%M:%S%z') + 3600 * offset) %>%
-      select(-offset)
-  }
+  url <- sprintf(
+    "https://api.findmespot.com/spot-main-web/consumer/rest-api/2.0/public/feed/%s/message.json",
+    feed_id
+  )
 
-  # construct URL for SPOT API
-  urlbase <- 'https://api.findmespot.com/spot-main-web/consumer/rest-api/2.0/public/feed/'
-  urltail <- '/message.json'
-  url <- paste(urlbase, id, urltail, sep='')
   if (!is.null(password))
     url <- paste0(url, '?feedPassword=', password)
 
-  resp <- fromJSON(url(url))
+  resp <- jsonlite::fromJSON(url(url))
+
   if (!is.null(resp$response$errors))
     stop(resp$response$errors$error$description)
-  else
-    msgs <- as.data.frame(resp)
 
-  count <- select(msgs, ends_with('totalCount'))[1, 1]
+  count <- resp$response$feedMessageResponse$totalCount
   pages <- (count - 1) %/% 50 + 1
-  data <- get_cols(msgs)
+
+  data <- as_tibble(resp$response$feedMessageResponse$messages$message) |>
+    spot_munge()
 
   if (all == TRUE && pages > 1) {
     # a single page of SPOT tracks is 50 trackpoints;
@@ -58,7 +96,7 @@ read_spot <- function(id, all = FALSE, password = NULL) {
       nextUrl <- paste(urlbase, id, urltail, startUrl, sep='')
       if (!is.null(password))
         nextUrl <- paste0(nextUrl, '&feedPassword=', password)
-      nextMsgs <- fromJSON(nextUrl) %>% as.data.frame %>% get_cols
+      nextMsgs <- spot_page(nextUrl)
       # append pages X's data to page 1's data
       data <- rbind(data, nextMsgs)
     }
@@ -177,20 +215,28 @@ read_garmin_connect <- function(activity_id, code) {
 #'
 #' @param api_key
 #' @param mmsi
-#' @param from_date
+#' @param from_date YYYY-MM-DD HH:MM:SS
+#' @param to_date YYYY-MM-DD HH:MM:SS
+#' @param period "hourly" or "daily"
 #'
-#' @return
-#' @importFrom dplyr select
-#' @importFrom glue glue
-#' @importFrom readr read_csv write_csv
+#' @return tbl
 #' @export
 #'
 #' @examples
-read_MT_hist <- function(api_key, mmsi, from_date, outfile) {
-  baseurl <- 'https://services.marinetraffic.com/api/exportvesseltrack/v:2'
-  url <- glue('{baseurl}/{key}/mmsi:{mmsi}/fromdate:{from_date}/protocol:csv')
-  read_csv(url) %>%
-    select(lat = LAT, lon = LON, time = TIMESTAMP) %>%
-    trk_reduce('10 min') %>%
-    write_csv(outfile)
-}
+read_MT_hist <-
+  function(api_key, mmsi,
+           from_date, to_date,
+           period = NULL,
+           outfile) {
+    baseurl <-
+      'https://services.marinetraffic.com/api/exportvesseltrack/v:3'
+    url <-
+      glue::glue(
+        '{baseurl}/{api_key}/mmsi:{mmsi}/fromdate:{from_date}/todate:{to_date}/protocol:csv'
+      )
+    if (!is.null(period))
+      url <- glue::glue("{url}/period:{period}/")
+
+    readr::read_csv(utils::URLencode(url)) |>
+      dplyr::select(lat = LAT, lon = LON, time = TIMESTAMP)
+  }
