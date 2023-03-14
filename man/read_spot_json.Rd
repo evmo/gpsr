@@ -9,9 +9,6 @@ read_spot_json(file_path, tz = "UTC")
 \arguments{
 \item{file_path}{}
 }
-\value{
-
-}
 \description{
 Read SPOT JSON
 }

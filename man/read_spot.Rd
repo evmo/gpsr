@@ -4,17 +4,17 @@
 \alias{read_spot}
 \title{Read data from the SPOT API}
 \usage{
-read_spot(id, all = FALSE, password = NULL)
+read_spot(feed_id, all = FALSE, password = NULL)
 }
 \arguments{
-\item{id}{SPOT feed ID}
-
 \item{all}{Fetch most recent 50 trackpoint (default) or all available}
 
 \item{password}{SPOT feed password}
+
+\item{id}{SPOT feed ID}
 }
 \value{
-A data.frame with three columns: lat (latitude), lon (longitude),
+A tibble with three columns: lat (latitude), lon (longitude),
  time (timestamp)
 }
 \description{

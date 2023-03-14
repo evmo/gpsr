@@ -44,9 +44,6 @@ trk_map(
 
 \item{lineColor}{color line connecting the trackpoints}
 }
-\value{
-
-}
 \description{
 Create a map of a track
 }

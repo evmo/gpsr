@@ -13,9 +13,6 @@ add_map_labels(map, data, labels, legendGroup = NULL, ...)
 
 \item{...}{}
 }
-\value{
-
-}
 \description{
 Add labels to points on map
 }

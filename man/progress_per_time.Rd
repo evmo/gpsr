@@ -9,9 +9,6 @@ progress_per_time(track, finish_lat, finish_lon, freq)
 \arguments{
 \item{freq}{}
 }
-\value{
-
-}
 \description{
 Get progress per time interval
 }

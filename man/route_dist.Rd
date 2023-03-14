@@ -9,9 +9,6 @@ route_dist(route)
 \arguments{
 \item{route}{df with 2 cols, lat and lon}
 }
-\value{
-
-}
 \description{
 Calculate route distance
 }

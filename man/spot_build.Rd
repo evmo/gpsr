@@ -9,9 +9,6 @@ spot_build(id, all = FALSE, password = NULL)
 \arguments{
 \item{password}{}
 }
-\value{
-
-}
 \description{
 Read multiple pages of SPOT data
 }

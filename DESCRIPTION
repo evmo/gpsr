@@ -18,7 +18,7 @@ Imports:
     data.table,
     purrr,
     lubridate
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Suggests: 
     knitr,
     rmarkdown
