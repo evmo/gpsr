@@ -105,7 +105,24 @@ read_spot <- function(feed_id, all = FALSE, password = NULL) {
   arrange(data, time)
 }
 
-#' Read data from DeLorme inReach API
+#' Process inReach XML API response
+#'
+#' @param xml
+#' @param attrib
+#'
+#' @return
+#' @importFrom xml2 xml_find_all xml_ns xml_text
+process_inreach_xml <- function(xml, attrib) {
+  xml_find_all(
+    xml,
+    xpath = paste0(".//d1:Data[@name = '", attrib, "']"),
+    ns = xml_ns(xml)
+  ) |>
+    xml_text() |>
+    stringr::str_trim("both")
+}
+
+#' Read data from Garmin inReach API
 #'
 #' @param id inReach ID
 #' @param date1 Start date
@@ -114,51 +131,31 @@ read_spot <- function(feed_id, all = FALSE, password = NULL) {
 #' @return A data.frame with three columns: lat (latitude), lon (longitude),
 #'  time (timestamp)
 #' @export
+#' @importFrom glue glue
 #'
-#' @references \url{https://support.delorme.com/kb/articles/26-about-inreach-kml-feeds}
+#' @references  \url{https://support.garmin.com/en-US/?faq=tdlDCyo1fJ5UxjUbA9rMY8}
 #' @examples
-read_delorme <- function(id, date1, date2 = NULL) {
-  urlhead <- 'https://share.delorme.com/feed/share/'
-  d1 <- strftime(date1, '%Y-%m-%dT%H:%MZ')
-  url <- paste0(urlhead, id, "?d1=", d1)
-  if (!(is.null(date2))) {
-    d2 <- strftime(date2, '%Y-%m-%dT%H:%MZ')
-    url <- paste0(url, "&d2=", d2)
-  }
+read_inreach <- function(id, date1, date2 = NULL) {
+  url <- glue(
+    "https://share.garmin.com/feed/share/{id}",
+     "?d1={strftime(date1, '%Y-%m-%dT%H:%MZ')}")
+
+  if (!(is.null(date2)))
+    url <- glue("{url}&d2={strftime(date2, '%Y-%m-%dT%H:%MZ')}")
+
   raw <- xml2::read_xml(url)
 
-  process <- function(data, name) {
-    xpath <- paste0(".//d1:Data[@name = '", name, "']")
-    xml2::xml_find_all(data, xpath, xml_ns(raw)) %>%
-      xml2::xml_text() %>% stringr::str_trim("both")
-  }
-
-  lat <- process(raw, "Latitude") %>% as.numeric
-  lon <- process(raw, "Longitude") %>% as.numeric
-  time <- process(raw, "Time UTC") %>% as.POSIXct(tz = 'GMT', format = '%m/%d/%Y %I:%M:%S %p')
-
-  d <- data.frame(lat, lon, time)
-  if (nrow(d) == 0) stop("no data")
-  else d
+  dplyr::tibble(
+    lat = process_inreach_xml(raw, "Latitude") |> as.numeric(),
+    lon = process_inreach_xml(raw, "Longitude") |> as.numeric(),
+    time = process_inreach_xml(raw, "Time UTC") |>
+      as.POSIXct(tz = 'GMT', format = '%m/%d/%Y %I:%M:%S %p')
+  )
 }
 
-read_traccar <- function(deviceid, start_time, stop_time,
-                         db, host, port, user, password) {
-  suppressPackageStartupMessages(library(dplyr))
-  suppressPackageStartupMessages(library(RMySQL))
-
-  db <- src_mysql(db, host, port, user, password)
-
-  res <- as.data.frame(tbl(db, sql(
-    "select uniqueid, devicetime, latitude, longitude
-    from positions join devices on (positions.deviceid = devices.id)
-    where accuracy = 0")) %>%
-      filter(uniqueid == id, devicetime > start, devicetime < stop) %>%
-      select(lat = latitude, lon = longitude, time = devicetime))
-
-  if (nrow(res) == 0) stop("No rows available")
-  else return(res)
-}
+#' @rdname read_inreach
+#' @export
+read_delorme <- read_inreach
 
 #' Get timezone from lat/lon coordinates via Google Timezone API
 #'
