@@ -59,13 +59,18 @@ spot_page <- function(url) {
 #' @return A tibble with three columns: lat (latitude), lon (longitude),
 #'  time (timestamp)
 #'
-#' @importFrom dplyr arrange as_tibble
+#' @importFrom dplyr arrange as_tibble filter
 #'
 #' @export
 #'
 #' @references \url{http://faq.findmespot.com/index.php?action=showEntry&data=69}
 #' @examples
-read_spot <- function(feed_id, all = FALSE, password = NULL) {
+read_spot <-
+  function(feed_id,
+           to = NULL,
+           from = NULL,
+           all = FALSE,
+           password = NULL) {
 
   url <- sprintf(
     "https://api.findmespot.com/spot-main-web/consumer/rest-api/2.0/public/feed/%s/message.json",
@@ -102,7 +107,9 @@ read_spot <- function(feed_id, all = FALSE, password = NULL) {
     }
   }
 
-  arrange(data, time)
+  arrange(data, time) |>
+    filter(time > from, time < to)
+
 }
 
 #' Process inReach XML API response
@@ -124,9 +131,9 @@ process_inreach_xml <- function(xml, attrib) {
 
 #' Read data from Garmin inReach API
 #'
+#' @param from dttm
+#' @param to dttm
 #' @param id inReach ID
-#' @param date1 Start date
-#' @param date2 End date
 #'
 #' @return A data.frame with three columns: lat (latitude), lon (longitude),
 #'  time (timestamp)
@@ -135,13 +142,13 @@ process_inreach_xml <- function(xml, attrib) {
 #'
 #' @references  \url{https://support.garmin.com/en-US/?faq=tdlDCyo1fJ5UxjUbA9rMY8}
 #' @examples
-read_inreach <- function(id, date1, date2 = NULL) {
+read_inreach <- function(id, from, to = NULL) {
   url <- glue(
     "https://share.garmin.com/feed/share/{id}",
-     "?d1={strftime(date1, '%Y-%m-%dT%H:%MZ')}")
+     "?d1={format(as.POSIXct(from), '%Y-%m-%dT%H:%MZ')}")
 
-  if (!(is.null(date2)))
-    url <- glue("{url}&d2={strftime(date2, '%Y-%m-%dT%H:%MZ')}")
+  if (!(is.null(to)))
+    url <- glue("{url}&d2={format(as.POSIXct(to), '%Y-%m-%dT%H:%MZ')}")
 
   raw <- xml2::read_xml(url)
 

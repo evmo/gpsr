@@ -5,16 +5,16 @@
 \alias{read_delorme}
 \title{Read data from Garmin inReach API}
 \usage{
-read_inreach(id, date1, date2 = NULL)
+read_inreach(id, from, to = NULL)
 
-read_delorme(id, date1, date2 = NULL)
+read_delorme(id, from, to = NULL)
 }
 \arguments{
 \item{id}{inReach ID}
 
-\item{date1}{Start date}
+\item{from}{dttm}
 
-\item{date2}{End date}
+\item{to}{dttm}
 }
 \value{
 A data.frame with three columns: lat (latitude), lon (longitude),
