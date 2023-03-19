@@ -14,10 +14,14 @@
 #' @export
 #'
 #' @examples
-base_map <- function(provider_tiles = NULL, custom_tiles = NULL,
-   p_tile_opts = list(), c_tile_opts = list(),
-   p_tile_labs = NULL, c_tile_labs = NULL,
-   proxy_map_id = NULL) {
+base_map <-
+  function(provider_tiles = NULL,
+           custom_tiles = NULL,
+           p_tile_opts = list(),
+           c_tile_opts = list(),
+           p_tile_labs = NULL,
+           c_tile_labs = NULL,
+           proxy_map_id = NULL) {
 
   # validate args
   if (!missing(p_tile_opts))
@@ -204,17 +208,26 @@ add_map_labels <- function(map, data, labels, legendGroup = NULL, ...) {
 #' @export
 #'
 #' @examples
-trk_map <- function(track, freq = "60 min", tz_offset = 0,
-  provider_tiles = NULL, custom_tiles = NULL,
-  p_tile_opts = list(), c_tile_opts = list(),
-  p_tile_labs = NULL, c_tile_labs = NULL,
-  labels = NULL, circleColor = NULL, lineColor = NULL) {
+trk_map <-
+  function(track,
+           freq = NULL,
+           tz_offset = 0,
+           provider_tiles = NULL,
+           custom_tiles = NULL,
+           p_tile_opts = list(),
+           c_tile_opts = list(),
+           p_tile_labs = NULL,
+           c_tile_labs = NULL,
+           labels = NULL,
+           circleColor = NULL,
+           lineColor = NULL) {
 
-  t = trk_reduce(track, freq)
+  t <- ifelse(!missing(freq), trk_reduce(track, freq), track)
+
   base_map(provider_tiles, custom_tiles, p_tile_opts, c_tile_opts,
-           p_tile_labs, c_tile_labs) %>%
-    map_path_points(data = t, circleColor) %>%
-    map_path_lines(data = t, lineColor) %>%
+           p_tile_labs, c_tile_labs) |>
+    map_path_points(data = t, circleColor) |>
+    map_path_lines(data = t, lineColor) |>
     add_map_labels(
       data = t,
       labels = format(t$time + tz_offset * 3600, "%H:%M")

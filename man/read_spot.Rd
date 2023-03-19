@@ -4,7 +4,7 @@
 \alias{read_spot}
 \title{Read data from the SPOT API}
 \usage{
-read_spot(feed_id, all = FALSE, password = NULL)
+read_spot(feed_id, to = NULL, from = NULL, all = FALSE, password = NULL)
 }
 \arguments{
 \item{all}{Fetch most recent 50 trackpoint (default) or all available}

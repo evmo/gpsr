@@ -6,7 +6,7 @@
 \usage{
 trk_map(
   track,
-  freq = "60 min",
+  freq = NULL,
   tz_offset = 0,
   provider_tiles = NULL,
   custom_tiles = NULL,
