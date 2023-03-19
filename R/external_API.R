@@ -96,11 +96,8 @@ read_spot <-
     # figure out how many pages we need to download
     for (p in 2:pages) {
       cat(paste0("Downloading page ", p, "\n"))
-      start <- 50 * (p - 1)
-      startUrl <- paste('?start=', start, sep='')
-      nextUrl <- paste(urlbase, id, urltail, startUrl, sep='')
-      if (!is.null(password))
-        nextUrl <- paste0(nextUrl, '&feedPassword=', password)
+      start_n <- 50 * (p - 1)
+      nextUrl <- glue::glue("{url}?start={start_n}")
       nextMsgs <- spot_page(nextUrl)
       # append pages X's data to page 1's data
       data <- rbind(data, nextMsgs)
